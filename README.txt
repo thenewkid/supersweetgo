@@ -16,3 +16,5 @@ it more social. We'll probably integrate it into facebook, twitter, and other so
 
 BUT, and this is the most important thing... I, We, are creating this because it doesn't exist and I
 want it! I have friends I won't to play Go but can't dedicate a full 1.5 hour everytime I want to play.
+
+Lets have some fun :)
