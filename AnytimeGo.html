@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            AnytimeGo.com: Play Go/Baduk/Weiqi with all the best features!
+        </title>
+        <link rel="stylesheet" href="AnytimeGo.css">
+    </head>
+    <body>
+
+        <h1>Welcome to AnytimeGo! The best Go site around.</h1>
+
+        <p>Get ready for awesomeness</p>
+
+        <canvas id="myCanvas" width="500" height="500">
+        </canvas>
+
+        <script language="javascript">
+            // display the go board image
+            var canvas = document.getElementById('myCanvas');
+            var context = canvas.getContext('2d');
+            var imageObj = new Image();
+
+            // valid coordinates for stones
+            // *just gonna hardcode an array for now
+
+            var valid_points = [65,88,110,132,154,176,201,224,248,270,293,315,339,363,386,408,432,455,477]
+
+            // main function
+            imageObj.onload = function() {
+                context.drawImage(imageObj, 50, 50);
+
+                // draw every stone stones, random colors, across diagonals
+                for (r = 0; r < valid_points.length; r++) {
+                    for (c = 0; c < valid_points.length; c++) {
+                        if (Math.random() > 0.5) {
+                            col = 'black'
+                        }else{
+                            col = 'white'
+                        }
+                        drawStone(valid_points[r],valid_points[c], col);
+                    }
+                }
+
+            };
+            imageObj.src = '19x19board.png';
+
+
+            function drawStone(x,y,color){
+                // draw a circle
+                context.beginPath();
+                context.arc(x,y,8,0,2 * Math.PI, false);
+                context.fillStyle = color
+                context.fill();
+                context.lineWidth = 5;
+                if (color == 'black') {
+                    context.strokeStyle = '#000000'
+                }else{ // white
+                    context.strokeStyle = '#fff'
+                }
+                context.stroke();
+            }
+
+        </script>
+    </body>
+</html>
