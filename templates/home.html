@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js">
+	</script>
+	<script src="js/go.js"></script>
+	<style>
+		body {
+		text-align:center;
+		}
+		input[type='text'] {
+			width: 100%;
+		}
+		input, #p1_col, #p2_col {
+			border-color: #FF3300;
+			color: #FF3300;
+			background-color:#0A141F;
+			font-size: 20px;
+			border-radius: 5px;
+		}
+		i {
+			font-size: 25px;
+		}
+	</style>
+</head>
+<body>
+	<h1>Go! Go! Go!</h1>
+	<h2>Create a Game</h2>
+	<div id="yason">
+	<div id="chillin">
+	<form method="post" action="/playgame">
+		<table style="margin: 0px auto">
+			<tr>
+				<td>
+					<input type="number" min="4" max="19" name="w" placeholder="Width" id="width" required />
+					<input type="number" min="4" max="19" name="h" placeholder="Height" id="height" required /><i id="hw"></i><i class='e'>{{height_width_err}}</i>
+				</td>
+			</tr>
+		</table>
+		<table style="margin: 0px auto;">
+			<tr>
+				<td><hr></td>
+			</tr>
+			<tr>
+				<td style="font-size: 30px;">Player 1</td>
+			</tr>
+			<tr>
+				<td>
+					<input type="text" name="player1_name" placeholder="Name" id="p1n" required />
+				</td>
+				<td>
+					<i id="player1_name"></i><i class='e'>{{p1n_err}}</i>
+				</td>
+			</tr>
+
+			<tr>
+				<td>
+					<input type="email" placeholder="Email" name="p1_email" id="player1_email">
+				</td>
+				<td>
+					<i id="p1_email"></i><i class="e">{{p1_email_err}}</i>
+				</td>
+			</tr>
+			<tr>
+				<td id="p1_col">
+					<input type="radio" class="ballin" id="p1_white" value="white" name="p1_color">White
+					<input type="radio" class="ballin" id="p1_black" value="black" name="p1_color">Black
+				</td>
+			</tr>
+		</table>
+		<table style="margin: 0px auto">
+			<tr>
+				<td><hr></td>
+			</tr>
+			<tr>
+				<td style="font-size: 30px;">Player 2</td>
+			</tr>
+			<tr>
+				<td> 
+					<input type="text" name="player2_name" id="p2n" placeholder="Name">
+				</td>
+				<td>
+					<i id="player2_name"></i><i class="e">{{p2n_err}}</i>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input type='email' name="p2_email" placeholder="Email">
+				</td>
+				<td>
+					<i id="p2_email"></i>
+				</td>
+			</tr>
+			<tr>
+				<td id="p2_col">
+					<input type="radio" class="ballin" id="p2_white" value="white" name="p2_color">White
+					<input type="radio" class="ballin" id="p2_black" value="black" name="p2_color">Black
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<br>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<input type='submit' value="Create Game">
+				</td>
+			</tr>
+		</table>
+	</form>
+</div>
+</div>
+
+</html>
+
