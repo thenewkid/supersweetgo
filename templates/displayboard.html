@@ -1,0 +1,10 @@
+<script>
+function a(e) {
+	alert(e);
+}
+</script>
+{% for e in data %}
+	{% for a in e %}
+		<script>alert({{a}})</script>
+	{% endfor %}
+{% endfor %}
