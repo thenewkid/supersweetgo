@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-# Author: Dylan Dannenhauer
-# Email:  cyberkid108@gmail.com
 #
 # Copyright 2007 Google Inc.
 #
@@ -16,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 import webapp2
 import jinja2
 import os
@@ -72,7 +69,39 @@ class HomePage(MainHandler):
                 self.render("home.html", **true_data)
         except Exception as e:
             self.write("Form request cannot be processed")
+
+class DisplayBoard(MainHandler):
+    def get(self):
+        try:
+            dim_x = None
+            dim_y = None
+            gmply_file = open("gameplayFiles/testing1.txt",'r')
+            colors = []
+            positions = []
+
+            lines = gmply_file.readlines()
+            for line_number in range(len(lines)):
+                line = lines[line_number].strip()
+                if line_number == 0:
+                    dim_x, dim_y  = line.split(',')
+                elif line_number > 0:
+                    plyr_color = line.split(' ')[0]
+                    letter_cord = line.split(' ')[1].split(',')[0]   
+                    num_cord = line.split(' ')[1].split(',')[1]
+                    colors.append(plyr_color)
+                    positions.append([letter_cord,num_cord])
+            self.write((colors, positions)) 
+            self.render('displayboard.html', data=moves)
+        except Exception as e:
+            self.write("request cnanot be processed"+ str(e))
+
+    # draw the board
+
+
+
+    # render the html page
             
 app = webapp2.WSGIApplication([
-    ('/', HomePage)
+    ('/', HomePage),
+    ('/displayboard', DisplayBoard)
 ], debug=True)

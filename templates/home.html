@@ -63,8 +63,8 @@
 			</tr>
 			<tr>
 				<td id="p1_col">
-					<input type="radio" class="ballin" id="p1_white" value="white" name="p1_color">White
-					<input type="radio" class="ballin" id="p1_black" value="black" name="p1_color">Black
+					<span class="ballin" id="p1_col" value="white" name="p1_color">White</span>
+					<input type='hidden' name="p1_color" value=''>
 				</td>
 			</tr>
 		</table>
@@ -93,8 +93,8 @@
 			</tr>
 			<tr>
 				<td id="p2_col">
-					<input type="radio" class="ballin" id="p2_white" value="white" name="p2_color">White
-					<input type="radio" class="ballin" id="p2_black" value="black" name="p2_color">Black
+					<span class="ballin" id="p2_col" value="black" name="p2_color">Black</span>
+					<input type='hidden' name="p2_color" value=''>
 				</td>
 			</tr>
 			<tr>
@@ -102,12 +102,10 @@
 					<br>
 				</td>
 			</tr>
-			<tr>
-				<td>
-					<input type='submit' value="Create Game">
-				</td>
-			</tr>
 		</table>
+		<br><br>
+		<input type='submit' value="Create Game">
+		<input type='button' id="switch_cols" value="Switch Colors">
 	</form>
 </div>
 </div>

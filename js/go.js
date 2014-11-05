@@ -72,21 +72,19 @@ function checkInput() {
 		}
 	}
 };
+function switchColors() {
+	var p1_color = document.getElementById('p1_col');
+	var p2_color = document.getElementById('p2_col');
+	var temp = p1_color.innerHTML;
+	p1_color.innerHTML = p2_color.innerHTML;
+	p2_color.innerHTML = temp;
+}
 function assignInputs() {
 	var inputs = getInputs();
 	each(inputs,assignOninput);
-	var radios = document.getElementsByClassName('ballin');
-	each(radios, function(e) {
-		e.onclick = function() {
-			alert(this);
-		}
-	})
-
-
+	var switchColorButton = document.getElementById('switch_cols');
+	switchColorButton.onclick = switchColors;
 };
-
-
-
 $(document).ready(function() {
 	assignInputs();
 })
