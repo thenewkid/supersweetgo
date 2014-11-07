@@ -28,12 +28,12 @@
 	<h2>Create a Game</h2>
 	<div id="yason">
 	<div id="chillin">
-	<form method="post" action="/playgame">
+	<form method="post" name="create_game_form">
 		<table style="margin: 0px auto">
 			<tr>
 				<td>
-					<input type="number" min="4" max="19" name="w" placeholder="Width" id="width" required />
-					<input type="number" min="4" max="19" name="h" placeholder="Height" id="height" required /><i id="hw"></i><i class='e'>{{height_width_err}}</i>
+					<input type="number" min="4" max="19" name="w" placeholder="Width" class="dimensions" id="width" required />
+					<input type="number" min="4" max="19" name="h" placeholder="Height" class="dimensions" id="height" required /><i id="hw"></i><i class='e' id='hw_err'>{{height_width_err}}</i>
 				</td>
 			</tr>
 		</table>
@@ -62,7 +62,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td id="p1_col">
+				<td>
 					<span class="ballin" id="p1_col" value="white" name="p1_color">White</span>
 					<input type='hidden' name="p1_color" value=''>
 				</td>
@@ -85,14 +85,14 @@
 			</tr>
 			<tr>
 				<td>
-					<input type='email' name="p2_email" placeholder="Email">
+					<input type='email' name="p2_email" id="player2_email" placeholder="Email">
 				</td>
 				<td>
 					<i id="p2_email"></i>
 				</td>
 			</tr>
 			<tr>
-				<td id="p2_col">
+				<td>
 					<span class="ballin" id="p2_col" value="black" name="p2_color">Black</span>
 					<input type='hidden' name="p2_color" value=''>
 				</td>
@@ -109,6 +109,6 @@
 	</form>
 </div>
 </div>
-
+{{data}}
 </html>
 

@@ -78,7 +78,7 @@ class DisplayBoard(MainHandler):
             gmply_file = open("gameplayFiles/testing1.txt",'r')
             colors = []
             positions = []
-
+            data = {}
             lines = gmply_file.readlines()
             for line_number in range(len(lines)):
                 line = lines[line_number].strip()
@@ -90,11 +90,12 @@ class DisplayBoard(MainHandler):
                     num_cord = line.split(' ')[1].split(',')[1]
                     colors.append(plyr_color)
                     positions.append([letter_cord,num_cord])
-            self.write((colors, positions)) 
-            self.render('displayboard.html', data=moves)
+            data['colors'] = colors
+            data['positions'] = positions
+            self.write(data)
+            self.render('displayboard.html')
         except Exception as e:
             self.write("request cnanot be processed"+ str(e))
-
     # draw the board
 
 
