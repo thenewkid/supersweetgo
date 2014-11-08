@@ -20,26 +20,25 @@ window.onload = function() {
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
 	var y = 35;
-	var x = 0;
+	var x = 35;
 	surface.strokeStyle = "black";
 	surface.lineWidth = 0.5;
-	for (var j = 0; j < 17; j++) {
+	for (var j = 0; j < 19; j++) {
 		surface.beginPath();
 		surface.moveTo(x, y);
-		surface.lineTo(canvas.width, y);
+		surface.lineTo(canvas.width-35, y);
 		surface.stroke();
 		y += 35;
 	}
-	y = 0;
+	y = 35;
 	x = 35;
-	for (var k = 0; k < 17; k++) {
+	for (var k = 0; k < 19; k++) {
 		surface.beginPath();
 		surface.moveTo(x, y);
-		surface.lineTo(x, canvas.height);
+		surface.lineTo(x, canvas.height-35);
 		surface.stroke();
 		x += 35;
 	}
-
 	// surface.strokeStyle = "black";
 	// surface.lineWidth = 2;
 	// surface.beginPath();
