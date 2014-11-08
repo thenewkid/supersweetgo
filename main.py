@@ -19,6 +19,7 @@ import jinja2
 import os
 from xml.dom import minidom
 import json
+import django.utils.simplejson as simplejson
 
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
@@ -77,26 +78,20 @@ class HomePage(MainHandler):
 class DisplayBoard(MainHandler):
     def get(self):
         try:
-
-
-
             gmplay_obj = minidom.parse('gameplayFiles\\test.xml')
-            dim = gmplay_obj.getElementsByTagName("dimension")
-            dim_val = dim[0].firstChild.data
-            moves = gmplay_obj.getElementsByTagName('move')
-            for move in moves:
-                self.write(move.getAttribute("color")+",")
-
-
-
-            self.write(dimension)
-
+            #jsonny = json.loads(gmplay_obj.toprettyxml())
+            # dim = gmplay_obj.getElementsByTagName("dimension")
+            # dim_val = dim[0].firstChild.data
+            # moves = gmplay_obj.getElementsByTagName('move')
+            # for move in moves:
+            #     self.write(move.getAttribute("color")+",")
+            #xml = gmplay_obj.toprettyxml()
+            #self.write(dimension)
             #dim = dom.getElementsByTagName('dimension')[0].data
             #moves = dom.getElementsByTagName('move')
             #self.write(dim)
-
-
-            self.render('displayboard.html', dim=type(dimension))
+            dick = [[1, 'b', 'a', 17], [2, 'w', 'm', 12]]
+            self.render('displayboard.html', balljuice = dick)
         except Exception as e:
             self.write("request cnanot be processed"+ str(e))
     # draw the board

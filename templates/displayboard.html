@@ -1,1 +1,12 @@
-{{dimension}}
+<script src="/js/readData.js"></script>
+{% for arr in balljuice %}
+	<script>addToData('{{arr[0]}}',
+					  '{{arr[1]}}',
+					  '{{arr[2]}}',
+					  '{{arr[3]}}')</script>
+
+{% endfor %}
+
+<button onclick="showData()">See data!!!</button>
+
+
