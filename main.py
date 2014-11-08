@@ -17,6 +17,10 @@
 import webapp2
 import jinja2
 import os
+from xml.dom import minidom
+import json
+
+
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), 
 	autoescape = True)
@@ -73,27 +77,26 @@ class HomePage(MainHandler):
 class DisplayBoard(MainHandler):
     def get(self):
         try:
-            dim_x = None
-            dim_y = None
-            gmply_file = open("gameplayFiles/testing1.txt",'r')
-            colors = []
-            positions = []
-            data = {}
-            lines = gmply_file.readlines()
-            for line_number in range(len(lines)):
-                line = lines[line_number].strip()
-                if line_number == 0:
-                    dim_x, dim_y  = line.split(',')
-                elif line_number > 0:
-                    plyr_color = line.split(' ')[0]
-                    letter_cord = line.split(' ')[1].split(',')[0]   
-                    num_cord = line.split(' ')[1].split(',')[1]
-                    colors.append(plyr_color)
-                    positions.append([letter_cord,num_cord])
-            data['colors'] = colors
-            data['positions'] = positions
-            self.write(data)
-            self.render('displayboard.html')
+
+
+
+            gmplay_obj = minidom.parse('gameplayFiles\\test.xml')
+            dim = gmplay_obj.getElementsByTagName("dimension")
+            dim_val = dim[0].firstChild.data
+            moves = gmplay_obj.getElementsByTagName('move')
+            for move in moves:
+                self.write(move.getAttribute("color")+",")
+
+
+
+            self.write(dimension)
+
+            #dim = dom.getElementsByTagName('dimension')[0].data
+            #moves = dom.getElementsByTagName('move')
+            #self.write(dim)
+
+
+            self.render('displayboard.html', dim=type(dimension))
         except Exception as e:
             self.write("request cnanot be processed"+ str(e))
     # draw the board
