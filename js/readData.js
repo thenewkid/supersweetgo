@@ -16,11 +16,22 @@ function showData() {
 	}
 }
 
+function nearestIntersectionCoord(x) {
+	if ((x % 35) > (35 / 2)) {
+		x = (Math.floor(x / 35) * 35) + 35;
+	} 
+	else{
+		x = (Math.floor(x / 35) * 35);	
+	}
+	return x;
+}
+
 window.onload = function() {
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
-	var y = 35;
-	var x = 35;
+	var CELL_SPACING = 35
+	var y = CELL_SPACING;
+	var x = CELL_SPACING;
 	surface.strokeStyle = "black";
 	surface.lineWidth = 0.5;
 	for (var j = 0; j < 19; j++) {
@@ -28,17 +39,33 @@ window.onload = function() {
 		surface.moveTo(x, y);
 		surface.lineTo(canvas.width-35, y);
 		surface.stroke();
-		y += 35;
+		y += CELL_SPACING;
+		surface.closePath();
 	}
-	y = 35;
-	x = 35;
+	y = CELL_SPACING;
+	x = CELL_SPACING;
 	for (var k = 0; k < 19; k++) {
 		surface.beginPath();
 		surface.moveTo(x, y);
 		surface.lineTo(x, canvas.height-35);
 		surface.stroke();
-		x += 35;
+		x += CELL_SPACING;
+		surface.closePath();
 	}
+	canvas.addEventListener('click', function(e) {
+		var canvasRect = this.getBoundingClientRect();
+		var gx = e.x - canvasRect.left;
+		var gy = e.y - canvasRect.top;
+		var igx = nearestIntersectionCoord(gx); 
+		var igy = nearestIntersectionCoord(gy);
+		//alert(igx + ' ' + igy);
+		surface.strokeStyle = 'green';
+		surface.lineWidth = 1;
+		surface.beginPath();
+		surface.arc(igx, igy, 16, (Math.PI/180)*0, (Math.PI/180)*360, false)
+		surface.stroke();
+		surface.closePath();
+	}, false);
 	// surface.strokeStyle = "black";
 	// surface.lineWidth = 2;
 	// surface.beginPath();
