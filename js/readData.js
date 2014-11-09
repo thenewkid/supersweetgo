@@ -9,17 +9,26 @@ function addToData(turn, color, x, y) {
 	curr_move.push(color);
 	curr_move.push(x);
 	curr_move.push(y);
-
 	moveHistory.push(curr_move);
 }
 function showData() {
-	for (i = 0; i < moveHistory.length; i++) {
-		alert(moveHistory[i]);
-	}
+	alert(moveHistory.length);
 }
 
 function getXYCoords(letter,number) {
+	// letter maps to x
+	// number maps to y
+	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
+	var letter_index = 0;
+	for (index = 0; index < x_letters.length; index++) {
+		if (x_letters[index].toLowerCase() == letter.toLowerCase()) {
+			letter_index = index;
+		}
+	}
 
+	var letter_index_x = (letter_index * CELL_SPACING) + CELL_SPACING;
+	var number_index_y = (number * CELL_SPACING) + CELL_SPACING;
+	return [letter_index_x,number_index_y];
 }
 
 function nearestIntersectionCoord(x) {
@@ -32,7 +41,18 @@ function nearestIntersectionCoord(x) {
 	return x;
 }
 
-window.onload = function() {
+function drawGoPiece(surface, x, y) {
+	    surface.strokeStyle = 'black';
+		surface.fillStyle = 'black';
+		surface.lineWidth = 1;
+		surface.beginPath();
+		surface.arc(x, y, PIECE_WIDTH, (Math.PI/180)*0, (Math.PI/180)*360, false);
+		surface.fill();
+		surface.stroke();
+		surface.closePath();
+}
+
+function init() {
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
 	var y = CELL_SPACING;
@@ -63,12 +83,11 @@ window.onload = function() {
 		surface.font = "18px arial";
 		surface.fillText(x_letters[k], x-42, CELL_SPACING-15)
 	}
-
-
+	alert(moveHistory.length)
 	for (var m = 0; m < moveHistory.length; m++) {
+		var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
+		drawGoPiece(surface, positionArray[0], positionArray[1]);
 	}
-
-
 	canvas.addEventListener('click', function(e) {
 		var canvasRect = this.getBoundingClientRect();
 		var gx = e.x - canvasRect.left;
@@ -76,14 +95,7 @@ window.onload = function() {
 		var igx = nearestIntersectionCoord(gx); 
 		var igy = nearestIntersectionCoord(gy);
 		//alert(igx + ' ' + igy);
-		surface.strokeStyle = 'black';
-		surface.fillStyle = 'black';
-		surface.lineWidth = 1;
-		surface.beginPath();
-		surface.arc(igx, igy, PIECE_WIDTH, (Math.PI/180)*0, (Math.PI/180)*360, false)
-		surface.fill();
-		surface.stroke();
-		surface.closePath();
+		drawGoPiece(surface, igx, igy); 
 	}, false);
 	// surface.strokeStyle = "black";
 	// surface.lineWidth = 2;

@@ -90,8 +90,8 @@ class DisplayBoard(MainHandler):
             #dim = dom.getElementsByTagName('dimension')[0].data
             #moves = dom.getElementsByTagName('move')
             #self.write(dim)
-            dick = [[1, 'b', 'a', 17], [2, 'w', 'm', 12]]
-            self.render('displayboard.html', balljuice = dick)
+            move_history = [[1, 'b', 'a', 17], [2, 'w', 'm', 12]]
+            self.render('displayboard.html', move_history = move_history)
         except Exception as e:
             self.write("request cnanot be processed"+ str(e))
     # draw the board
