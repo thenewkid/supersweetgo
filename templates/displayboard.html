@@ -1,14 +1,18 @@
 <script src="/js/readData.js"></script>
-{% for arr in balljuice %}
-	<script>addToData('{{arr[0]}}',
-					  '{{arr[1]}}',
-					  '{{arr[2]}}',
-					  '{{arr[3]}}')</script>
+{% for move in move_history %}
+	<script>
+		addToData(
+			'{{move[0]}}',
+			'{{move[1]}}',
+			'{{move[2]}}',
+			'{{move[3]}}'
+		)
+	</script>
 
 {% endfor %}
 
 <button onclick="showData()">See data!!!</button>
 
 <div style="text-align:center">
-<canvas width="700px" height="700px" style="border: 2px groove silver"></canvas>
+<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e"></canvas>
 </div>
