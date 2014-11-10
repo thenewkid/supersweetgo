@@ -20,6 +20,8 @@ function getXYCoords(letter,number) {
 	// number maps to y
 	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 	var letter_index = 0;
+	//Dustin you are retarted, you can replace the for loop with
+	//letter_index = x_letters.indexOf(letter);
 	for (index = 0; index < x_letters.length; index++) {
 		if (x_letters[index].toLowerCase() == letter.toLowerCase()) {
 			letter_index = index;
@@ -27,7 +29,7 @@ function getXYCoords(letter,number) {
 	}
 
 	var letter_index_x = (letter_index * CELL_SPACING) + CELL_SPACING;
-	var number_index_y = (number * CELL_SPACING) + CELL_SPACING;
+	var number_index_y = (number * CELL_SPACING);
 	return [letter_index_x,number_index_y];
 }
 
@@ -41,9 +43,15 @@ function nearestIntersectionCoord(x) {
 	return x;
 }
 
-function drawGoPiece(surface, x, y) {
-	    surface.strokeStyle = 'black';
-		surface.fillStyle = 'black';
+function drawGoPiece(surface, x, y, color) {
+		if (color == 'b') {
+			surface.strokeStyle = 'black';
+			surface.fillStyle = 'black';
+		}
+		else {
+			surface.strokeStyle = 'white';
+			surface.fillStyle = 'white';
+		}
 		surface.lineWidth = 1;
 		surface.beginPath();
 		surface.arc(x, y, PIECE_WIDTH, (Math.PI/180)*0, (Math.PI/180)*360, false);
@@ -86,7 +94,7 @@ function init() {
 	alert(moveHistory.length)
 	for (var m = 0; m < moveHistory.length; m++) {
 		var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
-		drawGoPiece(surface, positionArray[0], positionArray[1]);
+		drawGoPiece(surface, positionArray[0], positionArray[1], moveHistory[m][1]);
 	}
 	canvas.addEventListener('click', function(e) {
 		var canvasRect = this.getBoundingClientRect();

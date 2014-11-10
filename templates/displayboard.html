@@ -1,4 +1,7 @@
-<script src="/js/readData.js"></script>
+<!DOCTYPE html>
+<head>
+	<script src="/js/readData.js"></script>
+</head>
 {% for move in move_history %}
 	<script>
 		addToData(
@@ -10,12 +13,11 @@
 	</script>
 
 {% endfor %}
-
-<button onclick="showData()">See data!!!</button>
-
-<div style="text-align:center">
-<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e"></canvas>
-</div>
+<body>
+	<div style="text-align:center">
+	<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e"></canvas>
+	</div>
+</body>
 
 <script>
 window.onload = function() {

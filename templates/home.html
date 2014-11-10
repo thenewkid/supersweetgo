@@ -11,16 +11,11 @@
 		input[type='text'] {
 			width: 100%;
 		}
-		input, #p1_col, #p2_col {
-			border-color: #FF3300;
-			color: #FF3300;
-			background-color:#0A141F;
-			font-size: 20px;
-			border-radius: 5px;
-		}
 		i {
-			font-size: 25px;
+			font-size: 100%;
+			position: absolute;
 		}
+		
 	</style>
 </head>
 <body>
@@ -63,8 +58,8 @@
 			</tr>
 			<tr>
 				<td>
-					<span class="ballin" id="p1_col" value="white" name="p1_color">White</span>
-					<input type='hidden' name="p1_color" value=''>
+					<span class="ballin" id="p1_col" value="white">White</span>
+					<input type='hidden' name="p1_color" value='white'>
 				</td>
 			</tr>
 		</table>
@@ -93,8 +88,8 @@
 			</tr>
 			<tr>
 				<td>
-					<span class="ballin" id="p2_col" value="black" name="p2_color">Black</span>
-					<input type='hidden' name="p2_color" value=''>
+					<span class="ballin" id="p2_col" value="black">Black</span>
+					<input type='hidden' name="p2_color" value='black'>
 				</td>
 			</tr>
 			<tr>
@@ -105,10 +100,22 @@
 		</table>
 		<br><br>
 		<input type='submit' value="Create Game">
-		<input type='button' id="switch_cols" value="Switch Colors">
 	</form>
 </div>
 </div>
-{{data}}
+
+{% for game in games %}
+	{{game.player1_name}}
+	{{game.player2_name}}
+	{{game.player1_color}}
+	{{game.player2_color}}
+	{{game.player1_email}}
+	{{game.player2_email}}
+	{{game.player1_link}}
+	{{game.player2_link}}
+	{{game.game_play_file_name}}
+	{{game.game_creation_time}}
+{% endfor %}
+
 </html>
 
