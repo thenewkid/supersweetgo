@@ -20,6 +20,7 @@ import os
 from google.appengine.ext import db
 from xml.dom import minidom
 import random
+import pickle
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), 
@@ -45,29 +46,29 @@ class Games(db.Model):
     player2_color = db.StringProperty(required=True)
     player1_email = db.StringProperty(required=True)
     player2_email = db.StringProperty(required=True)
-    gameplay_file_name = db.StringProperty(required=True)
+    gameplay_key = db.StringProperty(required=True)
     player1_link = db.StringProperty(required=True)
     player2_link = db.StringProperty(required=True)
-
-
-
+    moves = db.TextProperty(required=True)
 
     
 class HomePage(MainHandler):
     def get(self):
-        games = Games.all()
+        games=Games.all()
         self.render("home.html", games=games)
+  
+
+class DisplayBoard(MainHandler):
+    def get(self):
+        self.write('display board get handler')
     def post(self):
-        #create xml file
-        #update the xml file with the form data
-        #store the flename in the database along with the game being made
-        #redirect to displayboard
+
         d = 'abcdefghijklmnopqrstuvwxyz123456789'
         games = Games.all()
         total_links = []
         total_gameplay_keys = []
         for game in games:
-            link = game.gameplay_file_name
+            link = game.gameplay_key
             total_gameplay_keys.append(link)
             p1_link = game.player1_link
             p2_link = game.player2_link
@@ -84,11 +85,13 @@ class HomePage(MainHandler):
         while player2_key in total_links:
             player2_key = "".join([d[random.randrange(0, len(d))] for x in range(10)])
 
-        gameplay_temp_file_name = "".join([d[random.randrange(0, len(d))] for x in range(20)]) + ".xml"
+        gameplay_temp_file_name = "".join([d[random.randrange(0, len(d))] for x in range(20)])
 
         while gameplay_temp_file_name in total_gameplay_keys:
-            gameplay_temp_file_name = "".join([d[random.randrange(0, len(d))] for x in range(20)]) + ".xml"
+            gameplay_temp_file_name = "".join([d[random.randrange(0, len(d))] for x in range(20)])
 
+        moves = []
+        pickle_moves_string = pickle.dumps(moves)
         new_game = Games(
                         player1_name = self.request.get('player1_name'),
                         player2_name = self.request.get('player2_name'),
@@ -96,46 +99,17 @@ class HomePage(MainHandler):
                         player2_color = self.request.get('p2_color'),
                         player1_email = self.request.get('p1_email'),
                         player2_email = self.request.get('p2_email'),
+                        gameplay_key = gameplay_temp_file_name,
                         player1_link = player1_key,
                         player2_link = player2_key,
-                        gameplay_file_name = gameplay_temp_file_name
+                        moves = pickle_moves_string
                     )
         new_game.put()
 
-        self.write("Thanks a game wil be started soon")
 
-        # new_gameplay_file = open('')
-        # width = self.request.get('w')
-        # height = self.request.get('h')
-        # self.redirect('/displayboard')
-
-            
-
-class DisplayBoard(MainHandler):
-    def get(self):
-
-        try:
-            gmplay_obj = minidom.parse('gameplayFiles\\test.xml')
-            #jsonny = json.loads(gmplay_obj.toprettyxml())
-            #dim = gmplay_obj.getElementsByTagName("dimension")
-            # dim_val = dim[0].firstChild.data
-            moves = gmplay_obj.getElementsByTagName('move')
-            move_history = []
-            for move in moves:
-                move_history.append([move.getAttribute('turn'), 
-                    move.getAttribute('color'), 
-                    move.getAttribute('x'),
-                     move.getAttribute('y')])
-
-            #     self.write(move.getAttribute("color")+",")
-            #xml = gmplay_obj.toprettyxml()
-            #self.write(dimension)
-            #dim = dom.getElementsByTagName('dimension')[0].data
-            #moves = dom.getElementsByTagName('move')
-            #self.write(dim)
-            self.render('displayboard.html', move_history = move_history)
-        except Exception as e:
-            self.write("request cnanot be processed"+ str(e))
+        self.write('game has been created')
+        #except Exception as e:
+            #self.write("request cnanot be processed"+ str(e))
     # draw the board
 
 
