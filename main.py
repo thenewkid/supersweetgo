@@ -100,37 +100,37 @@ class HomePage(MainHandler):
                         moves = pickle_moves_string
                     )
         new_game.put()
-
+        # add code here to send email to each player
 
         self.write('game has been created')
 
-class PlayGameAsBlack(MainHandler):
+class PlayGame(MainHandler):
     def get(self):
-        self.write('display board get handler')
+        self.write(self.request.url)
 
-class PlayGameAsWhite(MainHandler):
-    def get(self):
-        self.write('display board get handler')
+#games = Games.all()
+
+# black_links = []
+# white_links = []
+# # dylan change this later
+# for game in games:
+#     if game.player1_color == 'black':
+#         black_links.append(game.player1_link)
+#         white_links.append(game.player2.link)
+#     else:
+#         black_links.append(game.player1_link)
+#         white_links.append(game.player2.link)
+
+# new_urls = []
+# for black_link in black_links:
+#     new_urls.append([black_link, PlayGameAsBlack])
+# for white_link in white_links:
+#     new_urls.append([white_link, PlayGameAsWhite])
 
 
-#1grab all player links from db   
-games = Games.all()
-black_links = []
-white_links = []
-for game in games:
-    if game.player1_color == 'black':
-        black_links.append(game.player1_link)
-        white_links.append(game.player2.link)
-    else:
-        black_links.append(game.player1_link)
-        white_links.append(game.player2.link)
 
-
-
-#2
-
-def grab_links():     
+    
 app = webapp2.WSGIApplication([
     ('/', HomePage),
-    ('/displayboard', DisplayBoard)
+    (r'/[a-z0-9]+', PlayGame)
 ], debug=True)
