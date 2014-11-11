@@ -106,7 +106,34 @@ class HomePage(MainHandler):
 
 class PlayGame(MainHandler):
     def get(self):
-        self.write(self.request.url)
+        current_url = self.request.url
+        player_number = None
+        player_color = None
+        current_game = None
+        link = current_url[23:]
+        games = Games.all()
+        for game in games:
+            if game.player1_link == link:
+                player_number = 1
+                player_color = game.player1_color
+                current_game = game
+                break
+            elif game.player2_link == link:
+                player_number = 2
+                player_color = game.player2_color
+                current_game = game
+                break
+        moves = pickle.loads(current_game.moves)
+        player_data=[player_number, player_color]
+        #self.write((moves, player_data))
+        brand_new_game = False
+        if len(moves) == 0:
+            brand_new_game = True
+        self.render('displayboard.html',
+                    move_history=moves,
+                    player_info=player_data, 
+                    is_brand_new=brand_new_game
+                    )
 
 #games = Games.all()
 

@@ -1,6 +1,14 @@
 var moveHistory = [];
 var CELL_SPACING = 35;
 var PIECE_WIDTH = 16;
+var currentPlayerColor;
+
+function setCurrentColor(c) {
+	if (c == 'white')
+		currentPlayerColor = 'w';
+	else if (c == 'black')
+		currentPlayerColor = 'b';
+}
 
 function addToData(turn, color, x, y) {
 	// remember x is a letter and y is a number
@@ -91,10 +99,11 @@ function init() {
 		surface.font = "18px arial";
 		surface.fillText(x_letters[k], x-42, CELL_SPACING-15)
 	}
-	alert(moveHistory.length)
-	for (var m = 0; m < moveHistory.length; m++) {
-		var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
-		drawGoPiece(surface, positionArray[0], positionArray[1], moveHistory[m][1]);
+	if (moveHistory.length > 0) {
+		for (var m = 0; m < moveHistory.length; m++) {
+			var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
+			drawGoPiece(surface, positionArray[0], positionArray[1], moveHistory[m][1]);
+		}
 	}
 	canvas.addEventListener('click', function(e) {
 		var canvasRect = this.getBoundingClientRect();
@@ -103,7 +112,7 @@ function init() {
 		var igx = nearestIntersectionCoord(gx); 
 		var igy = nearestIntersectionCoord(gy);
 		//alert(igx + ' ' + igy);
-		drawGoPiece(surface, igx, igy); 
+		drawGoPiece(surface, igx, igy, currentPlayerColor); 
 	}, false);
 	// surface.strokeStyle = "black";
 	// surface.lineWidth = 2;

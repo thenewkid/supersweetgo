@@ -2,18 +2,21 @@
 <head>
 	<script src="/js/readData.js"></script>
 </head>
-{% for move in move_history %}
-	<script>
-		addToData(
-			'{{move[0]}}',
-			'{{move[1]}}',
-			'{{move[2]}}',
-			'{{move[3]}}'
-		)
-	</script>
-
-{% endfor %}
+{% if not is_brand_new %}
+	{% for move in move_history %}
+		<script>
+			addToData(
+				'{{move[0]}}',
+				'{{move[1]}}',
+				'{{move[2]}}',
+				'{{move[3]}}'
+			)
+		</script>
+	{% endfor %}
+{% endif %}
 <body>
+	<div>Player {{player_info[0]}}</div>
+	<div>Player Color: {{player_info[1]}}</div>
 	<div style="text-align:center">
 	<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e"></canvas>
 	</div>
@@ -21,6 +24,7 @@
 
 <script>
 window.onload = function() {
+	setCurrentColor('{{player_info[1]}}');
 	init();
 }
 </script>
