@@ -56,11 +56,6 @@ class HomePage(MainHandler):
     def get(self):
         games=Games.all()
         self.render("home.html", games=games)
-  
-
-class DisplayBoard(MainHandler):
-    def get(self):
-        self.write('display board get handler')
     def post(self):
 
         d = 'abcdefghijklmnopqrstuvwxyz123456789'
@@ -108,14 +103,33 @@ class DisplayBoard(MainHandler):
 
 
         self.write('game has been created')
-        #except Exception as e:
-            #self.write("request cnanot be processed"+ str(e))
-    # draw the board
+
+class PlayGameAsBlack(MainHandler):
+    def get(self):
+        self.write('display board get handler')
+
+class PlayGameAsWhite(MainHandler):
+    def get(self):
+        self.write('display board get handler')
+
+
+#1grab all player links from db   
+games = Games.all()
+black_links = []
+white_links = []
+for game in games:
+    if game.player1_color == 'black':
+        black_links.append(game.player1_link)
+        white_links.append(game.player2.link)
+    else:
+        black_links.append(game.player1_link)
+        white_links.append(game.player2.link)
 
 
 
-    # render the html page
-            
+#2
+
+def grab_links():     
 app = webapp2.WSGIApplication([
     ('/', HomePage),
     ('/displayboard', DisplayBoard)
