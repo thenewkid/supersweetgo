@@ -4,6 +4,7 @@ var PIECE_WIDTH = 16;
 var currentPlayerColor;
 var currentMoveData = [];
 var timesClicked = 0;
+var nextMoveArray = [];
 alert(moveHistory);
 
 function setCurrentColor(c) {
@@ -130,29 +131,44 @@ function init() {
 		var gy = e.y - canvasRect.top;
 		var igx = nearestIntersectionCoord(gx); 
 		var igy = nearestIntersectionCoord(gy);
-		//alert(igx + ' ' + igy);
+		
 		if (timesClicked == 0) {
-			timesClicked++;
+
 			drawGoPiece(surface, igx, igy, currentPlayerColor);
 			var lastMove = moveHistory[moveHistory.length-1];
 			var turnIncremented = lastMove[0] + 1;
 			var movePosition = getLetterNumberCoords(igx, igy);
 			var nextMoveArr = [turnIncremented, currentPlayerColor, movePosition[0], movePosition[1]];
-			moveHistory.push(nextMoveArr);
-			alert(moveHistory)
-			var undoMoveButton = document.createElement('button');
-			undoMoveButton.innerHTML = "Undo Move";
-			document.body.appendChild(undoMoveButton);
+			nextMoveArray = nextMoveArr;
+			moveHistory.push(nextMoveArray);
 
-			undoMoveButton.onclick = function() {
-				moveHistory.pop();
-				surface.clearRect(0, 0, canvas.width, canvas.height);
-				drawBoard(surface, canvas);
-				drawGoPieces(surface);
-				timesClicked = 0;
-				document.body.removeChild(undoMoveButton);
-			}
+			alert(moveHistory);
+
+			timesClicked++;
 		}
+		else if (timesClicked > 0) {
+			surface.clearRect(0, 0, canvas.width, canvas.height);
+			drawBoard(surface, canvas);
+			moveHistory.pop();
+			var lastMove = moveHistory[moveHistory.length-1];
+			var turnIncremented = lastMove[0] + 1;
+			var movePosition = getLetterNumberCoords(igx, igy);
+			var nextMoveArr = [turnIncremented, currentPlayerColor, movePosition[0], movePosition[1]];
+			nextMoveArray = nextMoveArr;
+			moveHistory.push(nextMoveArray);
+			drawGoPieces(surface);
+			alert(moveHistory);
+			timesClicked++;
+
+		}
+			// undoMoveButton.onclick = function() {
+			// 	moveHistory.pop();
+			// 	surface.clearRect(0, 0, canvas.width, canvas.height);
+			// 	drawBoard(surface, canvas);
+			// 	drawGoPieces(surface);
+			// 	timesClicked = 0;
+			// 	document.body.removeChild(undoMoveButton);
+			// }
 	}, false);
 	// surface.strokeStyle = "black";
 	// surface.lineWidth = 2;
