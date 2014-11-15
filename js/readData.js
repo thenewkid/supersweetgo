@@ -1,11 +1,11 @@
-var moveHistory = [[0, 'b', 'a', 5]];
+var moveHistory = [];
+var hasMoveHistoryBeenUpdated = false;
 var CELL_SPACING = 35;
 var PIECE_WIDTH = 16;
 var currentPlayerColor;
-var currentMoveData = [];
+var currentMoveData;
 var timesClicked = 0;
-var nextMoveArray = [];
-alert(moveHistory);
+
 
 function setCurrentColor(c) {
 	if (c == 'white')
@@ -131,35 +131,42 @@ function init() {
 		var gy = e.y - canvasRect.top;
 		var igx = nearestIntersectionCoord(gx); 
 		var igy = nearestIntersectionCoord(gy);
-		
+
 		if (timesClicked == 0) {
-
+			var turnToIncrement = 0;
 			drawGoPiece(surface, igx, igy, currentPlayerColor);
-			var lastMove = moveHistory[moveHistory.length-1];
-			var turnIncremented = lastMove[0] + 1;
-			var movePosition = getLetterNumberCoords(igx, igy);
-			var nextMoveArr = [turnIncremented, currentPlayerColor, movePosition[0], movePosition[1]];
-			nextMoveArray = nextMoveArr;
-			moveHistory.push(nextMoveArray);
 
+			if (moveHistory.length > 0) { 
+				var lastMove = moveHistory[moveHistory.length-1];
+				turnToIncrement = lastMove[0];
+			}
+
+			var movePosition = getLetterNumberCoords(igx, igy);
+			currentMoveData = [turnToIncrement, currentPlayerColor, movePosition[0], movePosition[1]];
+			moveHistory.push(currentMoveData);
+			hasMoveHistoryBeenUpdated = true;
 			alert(moveHistory);
 
 			timesClicked++;
 		}
 		else if (timesClicked > 0) {
+			var turnToIncrement = 0;
+
 			surface.clearRect(0, 0, canvas.width, canvas.height);
 			drawBoard(surface, canvas);
-			moveHistory.pop();
-			var lastMove = moveHistory[moveHistory.length-1];
-			var turnIncremented = lastMove[0] + 1;
+
+			if (moveHistory.length > 0) {
+				var lastMove = moveHistory[moveHistory.length-1];
+				turnToIncrement = lastMove[0];
+				moveHistory.pop();
+			}
 			var movePosition = getLetterNumberCoords(igx, igy);
-			var nextMoveArr = [turnIncremented, currentPlayerColor, movePosition[0], movePosition[1]];
-			nextMoveArray = nextMoveArr;
-			moveHistory.push(nextMoveArray);
+			currentMoveData = [turnToIncrement, currentPlayerColor, movePosition[0], movePosition[1]];
+			moveHistory.push(currentMoveData);
 			drawGoPieces(surface);
+			hasMoveHistoryBeenUpdated = true
 			alert(moveHistory);
 			timesClicked++;
-
 		}
 			// undoMoveButton.onclick = function() {
 			// 	moveHistory.pop();

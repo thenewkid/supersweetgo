@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <head>
 	<script src="/js/readData.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
+	</script>
 </head>
 {% if not is_brand_new %}
 	{% for move in move_history %}
@@ -20,11 +22,27 @@
 	<div style="text-align:center">
 	<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e"></canvas>
 	</div>
+	<form method="post" name="next_turn">
+		<input type='hidden' name='move_to_add_db' value='' id="u_m">
+		<button type='submit'>Submit Move</button>
+	</form>
 </body>
 
 <script>
 window.onload = function() {
+	alert(moveHistory);
 	setCurrentColor('{{player_info[1]}}');
 	init();
+	var form = document.next_turn;
+	$(form).submit(function() {
+		if (hasMoveHistoryBeenUpdated) {
+			form.move_to_add_db.value = currentMoveData.join('');
+			alert(form.move_to_add_db.value)
+			return true;
+		}
+		else 
+			return false;
+
+	})
 }
 </script>
