@@ -123,8 +123,8 @@ class PlayGame(MainHandler):
                 player_color = game.player2_color
                 current_game = game
                 break
-        #current_game.moves = pickle.dumps([])
-        #current_game.put()
+        # current_game.moves = pickle.dumps([])
+        # current_game.put()
         moves = pickle.loads(current_game.moves)
         player_data=[player_number, player_color]
         #self.write((moves, player_data))
