@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html>
 <head>
 	<script src="/js/readData.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
@@ -24,26 +25,10 @@
 	</div>
 	<form method="post" name="next_turn">
 		<input type='hidden' name='move_to_add_db' value='' id="u_m">
-		<button type='submit'>Submit Move</button>
+		<button type='submit' value='submit_move'>Submit Move</button>
 	</form>
 </body>
-
+</html>
 <script>
-window.onload = function() {
-	alert(moveHistory);
-	setCurrentColor('{{player_info[1]}}');
-	init();
-	var form = document.next_turn;
-	$(form).submit(function() {
-		if (hasMoveHistoryBeenUpdated) {
-			currentMoveData[0]++;
-			form.move_to_add_db.value = currentMoveData.join('');
-			alert(form.move_to_add_db.value)
-			return true;
-		}
-		else 
-			return false;
-
-	})
-}
+setCurrentColor('{{player_info[1]}}');
 </script>

@@ -1,13 +1,18 @@
 var moveHistory = [];
-var hasMoveHistoryBeenUpdated = false;
+var hasPieceBeenDrawn = false;
 var CELL_SPACING = 35;
 var PIECE_WIDTH = 16;
 var currentPlayerColor;
-var currentMoveData;
-var timesClicked = 0;
+var currentMoveData = [];
 
 
+
+function each(array, funky) {
+	for (var i = 0; i < array.length; i++)
+		funky(array[i]);
+}
 function setCurrentColor(c) {
+	alert(c);
 	if (c == 'white')
 		currentPlayerColor = 'w';
 	else if (c == 'black')
@@ -118,6 +123,27 @@ function drawBoard(surface, canvas) {
 		surface.fillText(x_letters[k], x-42, CELL_SPACING-15)
 	}
 }
+function retrieveAllTakenIntersections() {
+	//this function loops through move history and stores each x, y coords in an array
+	var currentTakenSpots = [];
+	each(moveHistory, function(move) {
+		var current = [];
+		current.push(move[2]);
+		current.push(move[3]);
+		currentTakenSpots.push(current);
+	})
+	return currentTakenSpots;
+}
+function checkSpotPosition(currentMoveArray) {
+	var currentMoveIntersectionsTaken = retrieveAllTakenIntersections();
+	for (var j = 0; j < currentMoveIntersectionsTaken.length; j++) {
+		var currentTakenIntersection = currentMoveIntersectionsTaken[j];
+		if (currentTakenIntersection[0] == currentMoveArray[0] && currentTakenIntersection[1] == currentMoveArray[1]) 
+			return true;
+	}
+	return false;
+
+}
 function init() {
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
@@ -131,62 +157,51 @@ function init() {
 		var gy = e.y - canvasRect.top;
 		var igx = nearestIntersectionCoord(gx); 
 		var igy = nearestIntersectionCoord(gy);
+		var movePosition = getLetterNumberCoords(igx, igy);
+		var isSpotTaken = checkSpotPosition(movePosition);
 
-		if (timesClicked == 0) {
+		if (isSpotTaken) 
+			alert("Please select a different spot");
+		else {
 			var turnToIncrement = 0;
-			drawGoPiece(surface, igx, igy, currentPlayerColor);
+			if (moveHistory.length > 0) 
+				turnToIncrement = moveHistory[moveHistory.length-1][0];
 
-			if (moveHistory.length > 0) { 
-				var lastMove = moveHistory[moveHistory.length-1];
-				turnToIncrement = lastMove[0];
+			if (currentMoveData.length == 0) {
+				currentMoveData = [turnToIncrement, currentPlayerColor, movePosition[0], movePosition[1]];
+				drawGoPiece(surface, igx, igy, currentPlayerColor);
+				hasPieceBeenDrawn = true;
 			}
-
-			var movePosition = getLetterNumberCoords(igx, igy);
-			currentMoveData = [turnToIncrement, currentPlayerColor, movePosition[0], movePosition[1]];
-			moveHistory.push(currentMoveData);
-			hasMoveHistoryBeenUpdated = true;
-			alert(moveHistory);
-
-			timesClicked++;
-		}
-		else if (timesClicked > 0) {
-			var turnToIncrement = 0;
-
-			surface.clearRect(0, 0, canvas.width, canvas.height);
-			drawBoard(surface, canvas);
-
-			if (moveHistory.length > 0) {
-				var lastMove = moveHistory[moveHistory.length-1];
-				turnToIncrement = lastMove[0];
-				moveHistory.pop();
+			else if (currentMoveData.length > 0) {
+				surface.clearRect(0, 0, canvas.width, canvas.height);
+				drawBoard(surface, canvas);
+				drawGoPieces(surface);
+				currentMoveData = [turnToIncrement, currentPlayerColor, movePosition[0], movePosition[1]];
+				drawGoPiece(surface, igx, igy, currentPlayerColor);
+				hasPieceBeenDrawn = true
 			}
-			var movePosition = getLetterNumberCoords(igx, igy);
-			currentMoveData = [turnToIncrement, currentPlayerColor, movePosition[0], movePosition[1]];
-			moveHistory.push(currentMoveData);
-			drawGoPieces(surface);
-			hasMoveHistoryBeenUpdated = true
-			alert(moveHistory);
-			timesClicked++;
 		}
-			// undoMoveButton.onclick = function() {
-			// 	moveHistory.pop();
-			// 	surface.clearRect(0, 0, canvas.width, canvas.height);
-			// 	drawBoard(surface, canvas);
-			// 	drawGoPieces(surface);
-			// 	timesClicked = 0;
-			// 	document.body.removeChild(undoMoveButton);
-			// }
 	}, false);
-	// surface.strokeStyle = "black";
-	// surface.lineWidth = 2;
-	// surface.beginPath();
-	// surface.moveTo(0, 10);
-	// surface.lineTo(canvas.width, 10);
-	// surface.stroke();
-	// surface.closePath();
 }
-//Notes Bitches. The server holds a copy of move history for each game.
-//whenever the move history changes on the server, it sends the next players turn 
-//a new page with the board loaded from the updated move history.
-//when  a black user makes a move and submits it, it then grabs the move data 
-//which is the turn, color, x, y 
+window.onload = function() {
+	alert(moveHistory);
+	init();
+	var form = document.next_turn;
+	$(form).submit(function() {
+		if (hasPieceBeenDrawn) {
+			currentMoveData[0]++;
+			form.move_to_add_db.value = currentMoveData.join('');
+			alert(form.move_to_add_db.value)
+			return true;
+		}
+		else {
+			var confirmPass = confirm("Are you sure you want to pass?");
+			if (confirmPass) {
+				form.move_to_add_db.value = "pass"; 
+				return true;
+			}
+			else
+				return false;
+		}
+	})
+}

@@ -142,17 +142,19 @@ class PlayGame(MainHandler):
         # games = games.all()
         # for game in games:
         new_moves = self.request.get("move_to_add_db")
-        link = self.request.url[23:]
-        games = Games.all()
-        curr_game = None
-        for game in games:
-            if game.player1_link == link or game.player2_link == link:
-                curr_game = game
+        self.write(new_moves)
+        # link = self.request.url[23:]
+        # games = Games.all()
+        # curr_game = None
+        # for game in games:
+        #     if game.player1_link == link or game.player2_link == link:
+        #         curr_game = game
 
-        moves = pickle.loads(curr_game.moves)
-        moves.append([new_moves[0], new_moves[1], new_moves[2], new_moves[3:]])
-        curr_game.moves = pickle.dumps(moves)
-        curr_game.put()
+        # moves = pickle.loads(curr_game.moves)
+
+        # moves.append([new_moves[0], new_moves[1], new_moves[2], new_moves[3:]])
+        # curr_game.moves = pickle.dumps(moves)
+        # curr_game.put()
 
         
 
