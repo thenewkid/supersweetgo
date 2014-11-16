@@ -7,14 +7,24 @@
 </head>
 {% if not is_brand_new %}
 	{% for move in move_history %}
-		<script>
-			addToData(
-				'{{move[0]}}',
-				'{{move[1]}}',
-				'{{move[2]}}',
-				'{{move[3]}}'
-			)
-		</script>
+		{% if move[2] == 'pass' %}
+			<script>
+				addPassToData(
+					'{{move[0]}}',
+					'{{move[1]}}',
+					'{{move[2]}}'
+				)
+			</script>
+		{% else %}
+			<script>
+				addToData(
+					'{{move[0]}}',
+					'{{move[1]}}',
+					'{{move[2]}}',
+					'{{move[3]}}'
+				)
+			</script>
+		{% endif %}
 	{% endfor %}
 {% endif %}
 <body>

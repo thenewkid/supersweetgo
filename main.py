@@ -137,24 +137,30 @@ class PlayGame(MainHandler):
                     is_brand_new=brand_new_game
                     )
     def post(self):
-        # updated_move_history = self.request.get("updated_moves")
-        # #get game by url
-        # games = games.all()
-        # for game in games:
+        opposing_colors = {'b':'w', 'w':'b'}
         new_moves = self.request.get("move_to_add_db")
-        self.write(new_moves)
-        # link = self.request.url[23:]
-        # games = Games.all()
-        # curr_game = None
-        # for game in games:
-        #     if game.player1_link == link or game.player2_link == link:
-        #         curr_game = game
+        link = self.request.url[23:]
+        games = Games.all()
+        curr_game = None
+        for game in games:
+            if game.player1_link == link or game.player2_link == link:
+                curr_game = game
 
-        # moves = pickle.loads(curr_game.moves)
-
-        # moves.append([new_moves[0], new_moves[1], new_moves[2], new_moves[3:]])
-        # curr_game.moves = pickle.dumps(moves)
-        # curr_game.put()
+        moves_db = pickle.loads(curr_game.moves)
+        if new_moves != 'pass':
+            new_moves = new_moves.split(',')
+            moves_db.append(new_moves)
+        else:
+            #white will always start first
+            if len(moves_db) == 0:
+                moves_db.append(['1', 'w', 'pass'])
+            else:
+                last_move = moves_db[len(moves_db)-1]
+                turnIncremented = int(last_move[0]) + 1
+                color_of_passer = opposing_colors[last_move[1]]
+                moves_db.append(['10', 'w', 'pass'])
+        curr_game.moves = pickle.dumps(moves_db)
+        curr_game.put()
 
         
 

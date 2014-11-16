@@ -21,19 +21,19 @@ function setCurrentColor(c) {
 function drawGoPieces(surface) {
 	if (moveHistory.length > 0) {
 		for (var m = 0; m < moveHistory.length; m++) {
+			if (moveHistory[m][2] == 'pass') 
+				continue;
 			var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
 			drawGoPiece(surface, positionArray[0], positionArray[1], moveHistory[m][1]);
 		}
 	}
 }
 function addToData(turn, color, x, y) {
-	// remember x is a letter and y is a number
-	var curr_move = [];
-	curr_move.push(turn);
-	curr_move.push(color);
-	curr_move.push(x);
-	curr_move.push(y);
-	moveHistory.push(curr_move);
+	moveHistory.push([turn, color, x, y]);
+}
+function addPassToData(turn, color, pass_string) {
+	var arr = [turn, color, pass_string]
+	moveHistory.push(arr);
 }
 function showData() {
 	alert(moveHistory.length);
@@ -70,24 +70,30 @@ function nearestIntersectionCoord(x) {
 	else{
 		x = (Math.floor(x / CELL_SPACING) * CELL_SPACING);	
 	}
+
+	if (x > 665)
+		x = 665;
+	else if (x < 35)
+		x = 35;
+
 	return x;
 }
 
 function drawGoPiece(surface, x, y, color) {
-		if (color == 'b') {
-			surface.strokeStyle = 'black';
-			surface.fillStyle = 'black';
-		}
-		else {
-			surface.strokeStyle = 'white';
-			surface.fillStyle = 'white';
-		}
-		surface.lineWidth = 1;
-		surface.beginPath();
-		surface.arc(x, y, PIECE_WIDTH, (Math.PI/180)*0, (Math.PI/180)*360, false);
-		surface.fill();
-		surface.stroke();
-		surface.closePath();
+	if (color == 'b') {
+		surface.strokeStyle = 'black';
+		surface.fillStyle = 'black';
+	}
+	else {
+		surface.strokeStyle = 'white';
+		surface.fillStyle = 'white';
+	}
+	surface.lineWidth = 1;
+	surface.beginPath();
+	surface.arc(x, y, PIECE_WIDTH, (Math.PI/180)*0, (Math.PI/180)*360, false);
+	surface.fill();
+	surface.stroke();
+	surface.closePath();
 }
 function drawBoard(surface, canvas) {
 	surface.strokeStyle = "black";
@@ -127,10 +133,7 @@ function retrieveAllTakenIntersections() {
 	//this function loops through move history and stores each x, y coords in an array
 	var currentTakenSpots = [];
 	each(moveHistory, function(move) {
-		var current = [];
-		current.push(move[2]);
-		current.push(move[3]);
-		currentTakenSpots.push(current);
+		currentTakenSpots.push([move[2], move[3]]);
 	})
 	return currentTakenSpots;
 }
@@ -159,7 +162,7 @@ function init() {
 		var igy = nearestIntersectionCoord(gy);
 		var movePosition = getLetterNumberCoords(igx, igy);
 		var isSpotTaken = checkSpotPosition(movePosition);
-
+		//alert(igx + ' ' + igy);
 		if (isSpotTaken) 
 			alert("Please select a different spot");
 		else {
@@ -169,6 +172,7 @@ function init() {
 
 			if (currentMoveData.length == 0) {
 				currentMoveData = [turnToIncrement, currentPlayerColor, movePosition[0], movePosition[1]];
+				
 				drawGoPiece(surface, igx, igy, currentPlayerColor);
 				hasPieceBeenDrawn = true;
 			}
@@ -184,20 +188,20 @@ function init() {
 	}, false);
 }
 window.onload = function() {
-	alert(moveHistory);
+	console.log(moveHistory);
 	init();
 	var form = document.next_turn;
 	$(form).submit(function() {
 		if (hasPieceBeenDrawn) {
 			currentMoveData[0]++;
-			form.move_to_add_db.value = currentMoveData.join('');
+			form.move_to_add_db.value = currentMoveData.join(',');
 			alert(form.move_to_add_db.value)
 			return true;
 		}
 		else {
 			var confirmPass = confirm("Are you sure you want to pass?");
 			if (confirmPass) {
-				form.move_to_add_db.value = "pass"; 
+				form.move_to_add_db.value = 'pass'; 
 				return true;
 			}
 			else
@@ -205,3 +209,4 @@ window.onload = function() {
 		}
 	})
 }
+//once the user has clicked, do we want to have a button that says undo move so that they can pass after already placing a go PIECE_WIDTH
