@@ -201,7 +201,7 @@ window.onload = function() {
 		else {
 			var confirmPass = confirm("Are you sure you want to pass?");
 			if (confirmPass) {
-				form.move_to_add_db.value = 'pass'; 
+				form.move_to_add_db.value = 'pass';
 				return true;
 			}
 			else

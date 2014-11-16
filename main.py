@@ -158,7 +158,7 @@ class PlayGame(MainHandler):
                 last_move = moves_db[len(moves_db)-1]
                 turnIncremented = int(last_move[0]) + 1
                 color_of_passer = opposing_colors[last_move[1]]
-                moves_db.append(['10', 'w', 'pass'])
+                moves_db.append([str(turnIncremented), color_of_passer, 'pass'])
         curr_game.moves = pickle.dumps(moves_db)
         curr_game.put()
 
