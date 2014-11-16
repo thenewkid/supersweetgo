@@ -109,6 +109,7 @@ class PlayGame(MainHandler):
         current_url = self.request.url
         player_number = None
         player_color = None
+        player_name = None
         current_game = None
         link = current_url[23:]
         games = Games.all()
@@ -116,17 +117,19 @@ class PlayGame(MainHandler):
             if game.player1_link == link:
                 player_number = 1
                 player_color = game.player1_color
+                player_name = game.player1_name
                 current_game = game
                 break
             elif game.player2_link == link:
                 player_number = 2
                 player_color = game.player2_color
+                player_name = game.player2_name
                 current_game = game
                 break
         # current_game.moves = pickle.dumps([])
         # current_game.put()
         moves = pickle.loads(current_game.moves)
-        player_data=[player_number, player_color]
+        player_data=[player_number, player_color, player_name]
         #self.write((moves, player_data))
         brand_new_game = False
         if len(moves) == 0:

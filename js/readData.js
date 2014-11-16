@@ -2,7 +2,7 @@ var moveHistory = [];
 var hasPieceBeenDrawn = false;
 var CELL_SPACING = 35;
 var PIECE_WIDTH = 16;
-var currentPlayerColor;
+var playerColor;
 var currentMoveData = [];
 
 
@@ -12,11 +12,10 @@ function each(array, funky) {
 		funky(array[i]);
 }
 function setCurrentColor(c) {
-	alert(c);
 	if (c == 'white')
-		currentPlayerColor = 'w';
+		playerColor = 'w';
 	else if (c == 'black')
-		currentPlayerColor = 'b';
+		playerColor = 'b';
 }
 function drawGoPieces(surface) {
 	if (moveHistory.length > 0) {
@@ -154,38 +153,56 @@ function init() {
 	drawBoard(surface, canvas);
 	drawGoPieces(surface);
 
-	canvas.addEventListener('click', function(e) {
-		var canvasRect = this.getBoundingClientRect();
-		var gx = e.x - canvasRect.left;
-		var gy = e.y - canvasRect.top;
-		var igx = nearestIntersectionCoord(gx); 
-		var igy = nearestIntersectionCoord(gy);
-		var movePosition = getLetterNumberCoords(igx, igy);
-		var isSpotTaken = checkSpotPosition(movePosition);
-		//alert(igx + ' ' + igy);
-		if (isSpotTaken) 
-			alert("Please select a different spot");
-		else {
-			var turnToIncrement = 0;
-			if (moveHistory.length > 0) 
-				turnToIncrement = moveHistory[moveHistory.length-1][0];
+	var colorOpp = {'b':'white', 'w':'black'}
+	var currentPlayerTurn = document.getElementById('current_turn');
+	var lastPlayerTurnColor;
 
-			if (currentMoveData.length == 0) {
-				currentMoveData = [turnToIncrement, currentPlayerColor, movePosition[0], movePosition[1]];
+	if (moveHistory.length == 0) 
+		currentPlayerTurn.innerHTML = "White Goes First";
+	else {
+		lastPlayerTurnColor = moveHistory[moveHistory.length-1][1];
+		currentPlayerTurn.innerHTML = colorOpp[lastPlayerTurnColor] + "'s turn";
+	}
+
+	if (playerColor != lastPlayerTurnColor) {
+		canvas.addEventListener('click', function(e) {
+			var canvasRect = this.getBoundingClientRect();
+			var gx = e.x - canvasRect.left;
+			var gy = e.y - canvasRect.top;
+			var igx = nearestIntersectionCoord(gx); 
+			var igy = nearestIntersectionCoord(gy);
+			var movePosition = getLetterNumberCoords(igx, igy);
+			var isSpotTaken = checkSpotPosition(movePosition);
+			//alert(igx + ' ' + igy);
+			if (isSpotTaken) 
+				alert("Please select a different spot");
+			else {
+				var turnToIncrement = 0;
+				if (moveHistory.length > 0) 
+					turnToIncrement = moveHistory[moveHistory.length-1][0];
+
+				if (currentMoveData.length == 0) {
+					currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
 				
-				drawGoPiece(surface, igx, igy, currentPlayerColor);
-				hasPieceBeenDrawn = true;
+					drawGoPiece(surface, igx, igy, playerColor);
+					hasPieceBeenDrawn = true;
+				}
+				else if (currentMoveData.length > 0) {
+					surface.clearRect(0, 0, canvas.width, canvas.height);
+					drawBoard(surface, canvas);
+					drawGoPieces(surface);
+					currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
+					drawGoPiece(surface, igx, igy, playerColor);
+					hasPieceBeenDrawn = true
+				}
 			}
-			else if (currentMoveData.length > 0) {
-				surface.clearRect(0, 0, canvas.width, canvas.height);
-				drawBoard(surface, canvas);
-				drawGoPieces(surface);
-				currentMoveData = [turnToIncrement, currentPlayerColor, movePosition[0], movePosition[1]];
-				drawGoPiece(surface, igx, igy, currentPlayerColor);
-				hasPieceBeenDrawn = true
-			}
-		}
-	}, false);
+		}, false);
+	}
+	else {
+		canvas.addEventListener('click', function() {
+			alert("You must wait for the other player!!! Be Patient");
+		}, false);
+	}
 }
 window.onload = function() {
 	console.log(moveHistory);
@@ -195,7 +212,6 @@ window.onload = function() {
 		if (hasPieceBeenDrawn) {
 			currentMoveData[0]++;
 			form.move_to_add_db.value = currentMoveData.join(',');
-			alert(form.move_to_add_db.value)
 			return true;
 		}
 		else {
