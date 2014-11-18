@@ -141,6 +141,7 @@ class PlayGame(MainHandler):
                     )
     def post(self):
         opposing_colors = {'b':'w', 'w':'b'}
+
         new_moves = self.request.get("move_to_add_db")
         link = self.request.url[23:]
         games = Games.all()
@@ -164,6 +165,7 @@ class PlayGame(MainHandler):
                 moves_db.append([str(turnIncremented), color_of_passer, 'pass'])
         curr_game.moves = pickle.dumps(moves_db)
         curr_game.put()
+        self.redirect('/' + link)
 
         
 

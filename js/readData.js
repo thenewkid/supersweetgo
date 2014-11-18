@@ -202,6 +202,9 @@ function init() {
 		canvas.addEventListener('click', function() {
 			alert("You must wait for the other player!!! Be Patient");
 		}, false);
+		window.setInterval(function() {
+			location.reload(true);
+		}, 2000);
 	}
 }
 window.onload = function() {

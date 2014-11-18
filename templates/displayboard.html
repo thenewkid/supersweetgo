@@ -38,9 +38,11 @@
 	<form method="post" name="next_turn">
 		<input type='hidden' name='move_to_add_db' value='' id="u_m">
 		<button type='submit' value='submit_move'>Submit Move</button>
+		<a href="javascript:bang();">bang bang</a>
 	</form>
 </body>
 </html>
 <script>
+function bang() {alert("bang bang");}
 setCurrentColor('{{player_info[1]}}');
 </script>
