@@ -185,12 +185,20 @@ function checkSpotPosition(currentMoveArray) {
 }
 function callAjaxNigga() {
 	$.ajax({
-		url: '/' + document.URL.substring(23),
+		// url: document.URL.substring(23),
+		//all ajax does is send a post request asking for the length of the moves from the server
+		//if this length is higher, then we reload the page, 
+		//a better way to do this might be to send the current length of the move History to ther server
+		//and if the length of the move history on the server is greater than the one we sent then
+		//we send the new move history array of data as json homie 
 		type: 'POST',
-		data: {'hasMoveHistoryChanged':false},
+		data: {'moveHistoryLength':moveHistory.length},
 		dataType: 'json',
-		success: function(data) {
-			alert(data.a);
+		success: function(movesLengthFromServer) {
+			if (movesLengthFromServer > moveHistory.length)
+				location.reload(true);
+				return
+
 			// if (data['hasMoveHistoryChanged'] == true)
 			// 	location.reload(true);
 		}
@@ -217,7 +225,8 @@ function init() {
 			addCanvasListener(canvas, surface);
 		else {
 			addNotYourTurnListener(canvas);
-			removeSubmitButton();	
+			removeSubmitButton();
+			window.setInterval(callAjaxNigga, 4000);
 		}
 	}
 	else {
@@ -228,6 +237,7 @@ function init() {
 		else {
 			addNotYourTurnListener(canvas);
 			removeSubmitButton();
+			window.setInterval(callAjaxNigga, 4000);
 		}
 			
 		
