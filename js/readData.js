@@ -5,8 +5,6 @@ var PIECE_WIDTH = 16;
 var playerColor;
 var currentMoveData = [];
 
-
-
 function each(array, funky) {
 	for (var i = 0; i < array.length; i++)
 		funky(array[i]);
@@ -20,11 +18,11 @@ function setCurrentColor(c) {
 function drawGoPieces(surface) {
 	if (moveHistory.length > 0) {
 		for (var m = 0; m < moveHistory.length; m++) {
-			if (moveHistory[m][2] == 'pass') 
-				continue;
-			var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
-			drawGoPiece(surface, positionArray[0], positionArray[1], moveHistory[m][1]);
-		}
+			if (moveHistory[m][2] != 'pass') {
+				var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
+				drawGoPiece(surface, positionArray[0], positionArray[1], moveHistory[m][1]);
+			}
+		}	
 	}
 }
 function addToData(turn, color, x, y) {
@@ -128,6 +126,45 @@ function drawBoard(surface, canvas) {
 		surface.fillText(x_letters[k], x-42, CELL_SPACING-15)
 	}
 }
+function addCanvasListener(canvas, surface) {
+	canvas.addEventListener('click', function(e) {
+		var canvasRect = this.getBoundingClientRect();
+		var gx = e.x - canvasRect.left;
+		var gy = e.y - canvasRect.top;
+		var igx = nearestIntersectionCoord(gx); 
+		var igy = nearestIntersectionCoord(gy);
+		var movePosition = getLetterNumberCoords(igx, igy);
+		var isSpotTaken = checkSpotPosition(movePosition);
+		//alert(igx + ' ' + igy);
+		if (isSpotTaken) 
+			alert("Please select a different spot");
+		else {
+			var turnToIncrement = 0;
+			if (moveHistory.length > 0) 
+				turnToIncrement = moveHistory[moveHistory.length-1][0];
+
+			if (currentMoveData.length == 0) {
+				currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
+			
+				drawGoPiece(surface, igx, igy, playerColor);
+				hasPieceBeenDrawn = true;
+			}
+			else if (currentMoveData.length > 0) {
+				surface.clearRect(0, 0, canvas.width, canvas.height);
+				drawBoard(surface, canvas);
+				drawGoPieces(surface);
+				currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
+				drawGoPiece(surface, igx, igy, playerColor);
+				hasPieceBeenDrawn = true
+			}
+		}
+	}, false);
+}
+function addNotYourTurnListener(canvas) {
+	canvas.addEventListener('click', function() {
+		alert("You must wait for the other player!!! Be Patient");
+	}, false);
+}
 function retrieveAllTakenIntersections() {
 	//this function loops through move history and stores each x, y coords in an array
 	var currentTakenSpots = [];
@@ -146,6 +183,23 @@ function checkSpotPosition(currentMoveArray) {
 	return false;
 
 }
+function callAjaxNigga() {
+	$.ajax({
+		url: '/' + document.URL.substring(23),
+		type: 'POST',
+		data: {'hasMoveHistoryChanged':false},
+		dataType: 'json',
+		success: function(data) {
+			alert(data.a);
+			// if (data['hasMoveHistoryChanged'] == true)
+			// 	location.reload(true);
+		}
+	})
+}
+function removeSubmitButton() {
+	var button = document.getElementById("submit_hoes_to_the_pimp");
+	document.next_turn.removeChild(button);
+}
 function init() {
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
@@ -157,54 +211,26 @@ function init() {
 	var currentPlayerTurn = document.getElementById('current_turn');
 	var lastPlayerTurnColor;
 
-	if (moveHistory.length == 0) 
-		currentPlayerTurn.innerHTML = "White Goes First";
+	if (moveHistory.length == 0) {
+		currentPlayerTurn.innerHTML = "Black Goes First";
+		if (playerColor == 'b') 
+			addCanvasListener(canvas, surface);
+		else {
+			addNotYourTurnListener(canvas);
+			removeSubmitButton();	
+		}
+	}
 	else {
 		lastPlayerTurnColor = moveHistory[moveHistory.length-1][1];
 		currentPlayerTurn.innerHTML = colorOpp[lastPlayerTurnColor] + "'s turn";
-	}
-
-	if (playerColor != lastPlayerTurnColor) {
-		canvas.addEventListener('click', function(e) {
-			var canvasRect = this.getBoundingClientRect();
-			var gx = e.x - canvasRect.left;
-			var gy = e.y - canvasRect.top;
-			var igx = nearestIntersectionCoord(gx); 
-			var igy = nearestIntersectionCoord(gy);
-			var movePosition = getLetterNumberCoords(igx, igy);
-			var isSpotTaken = checkSpotPosition(movePosition);
-			//alert(igx + ' ' + igy);
-			if (isSpotTaken) 
-				alert("Please select a different spot");
-			else {
-				var turnToIncrement = 0;
-				if (moveHistory.length > 0) 
-					turnToIncrement = moveHistory[moveHistory.length-1][0];
-
-				if (currentMoveData.length == 0) {
-					currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
-				
-					drawGoPiece(surface, igx, igy, playerColor);
-					hasPieceBeenDrawn = true;
-				}
-				else if (currentMoveData.length > 0) {
-					surface.clearRect(0, 0, canvas.width, canvas.height);
-					drawBoard(surface, canvas);
-					drawGoPieces(surface);
-					currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
-					drawGoPiece(surface, igx, igy, playerColor);
-					hasPieceBeenDrawn = true
-				}
-			}
-		}, false);
-	}
-	else {
-		canvas.addEventListener('click', function() {
-			alert("You must wait for the other player!!! Be Patient");
-		}, false);
-		window.setInterval(function() {
-			location.reload(true);
-		}, 2000);
+		if (playerColor != lastPlayerTurnColor)
+			addCanvasListener(canvas, surface);
+		else {
+			addNotYourTurnListener(canvas);
+			removeSubmitButton();
+		}
+			
+		
 	}
 }
 window.onload = function() {
@@ -226,6 +252,7 @@ window.onload = function() {
 			else
 				return false;
 		}
-	})
+	});
 }
+
 //once the user has clicked, do we want to have a button that says undo move so that they can pass after already placing a go PIECE_WIDTH

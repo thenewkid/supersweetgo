@@ -17,6 +17,7 @@
 import webapp2
 import jinja2
 import os
+import json
 from google.appengine.ext import db
 from xml.dom import minidom
 import random
@@ -141,31 +142,51 @@ class PlayGame(MainHandler):
                     )
     def post(self):
         opposing_colors = {'b':'w', 'w':'b'}
-
         new_moves = self.request.get("move_to_add_db")
         link = self.request.url[23:]
         games = Games.all()
         curr_game = None
+        player_number = None
+        player_color = None
+        player_name = None
         for game in games:
-            if game.player1_link == link or game.player2_link == link:
+            if game.player1_link == link:
+                player_number = 1
+                player_color = game.player1_color
+                player_name = game.player1_name
                 curr_game = game
+                break
+            elif game.player2_link == link:
+                player_number = 2
+                player_color = game.player2_color
+                player_name = game.player2_name
+                curr_game = game
+                break
 
         moves_db = pickle.loads(curr_game.moves)
         if new_moves != 'pass':
             new_moves = new_moves.split(',')
             moves_db.append(new_moves)
         else:
-            #white will always start first
+            #black will always start first
             if len(moves_db) == 0:
-                moves_db.append(['1', 'w', 'pass'])
+                moves_db.append(['1', 'b', 'pass'])
             else:
                 last_move = moves_db[len(moves_db)-1]
                 turnIncremented = int(last_move[0]) + 1
                 color_of_passer = opposing_colors[last_move[1]]
                 moves_db.append([str(turnIncremented), color_of_passer, 'pass'])
+        self.write(moves_db)
         curr_game.moves = pickle.dumps(moves_db)
         curr_game.put()
-        self.redirect('/' + link)
+        player_data=[player_number, player_color, player_name]
+        self.render("displayboard.html",
+                    move_history = moves_db,
+                    player_info = player_data,
+                    is_brand_new = False
+                    )
+
+
 
         
 
