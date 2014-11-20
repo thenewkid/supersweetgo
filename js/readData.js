@@ -4,7 +4,7 @@ var CELL_SPACING = 35;
 var PIECE_WIDTH = 16;
 var playerColor;
 var currentMoveData = [];
-
+var ajaxCalling;
 function each(array, funky) {
 	for (var i = 0; i < array.length; i++)
 		funky(array[i]);
@@ -192,15 +192,16 @@ function callAjaxNigga() {
 		//and if the length of the move history on the server is greater than the one we sent then
 		//we send the new move history array of data as json homie 
 		type: 'POST',
-		data: {'moveHistoryLength':moveHistory.length},
+		data: {'subm': 'submit_ajax'},
 		dataType: 'json',
 		success: function(movesLengthFromServer) {
-			if (movesLengthFromServer > moveHistory.length)
-				location.reload(true);
-				return
+			
+			if (movesLengthFromServer > moveHistory.length) {
+				clearInterval(ajaxCalling);
+				var chill = window.location;
+				window.location = chill.protocol + '//' + chill.host + chill.pathname;
 
-			// if (data['hasMoveHistoryChanged'] == true)
-			// 	location.reload(true);
+			}
 		}
 	})
 }
@@ -211,7 +212,6 @@ function removeSubmitButton() {
 function init() {
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
-
 	drawBoard(surface, canvas);
 	drawGoPieces(surface);
 
@@ -226,7 +226,7 @@ function init() {
 		else {
 			addNotYourTurnListener(canvas);
 			removeSubmitButton();
-			window.setInterval(callAjaxNigga, 4000);
+			ajaxCalling = window.setInterval(callAjaxNigga, 4000);
 		}
 	}
 	else {
@@ -237,10 +237,8 @@ function init() {
 		else {
 			addNotYourTurnListener(canvas);
 			removeSubmitButton();
-			window.setInterval(callAjaxNigga, 4000);
+			ajaxCalling = window.setInterval(callAjaxNigga, 4000);
 		}
-			
-		
 	}
 }
 window.onload = function() {

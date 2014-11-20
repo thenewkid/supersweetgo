@@ -141,8 +141,8 @@ class PlayGame(MainHandler):
                     is_brand_new=brand_new_game
                     )
     def post(self):
-        data_from_ajax = self.request.get('moveHistoryLength')
-        if data_from_ajax == "":
+        form_submit = self.request.get('subm')
+        if form_submit == 'submit_move':
             opposing_colors = {'b':'w', 'w':'b'}
             new_moves = self.request.get("move_to_add_db")
             link = self.request.url[23:]
@@ -189,7 +189,7 @@ class PlayGame(MainHandler):
                     player_info = player_data,
                     is_brand_new = False
                     )
-        else:
+        elif form_submit == 'submit_ajax':
             link = self.request.url[23:]
             curr_game = None
             games = Games.all()
