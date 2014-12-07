@@ -19,9 +19,12 @@ import jinja2
 import os
 import json
 from google.appengine.ext import db
+from google.appengine.api import mail
 from xml.dom import minidom
 import random
 import pickle
+import string
+import re
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), 
@@ -41,190 +44,245 @@ class MainHandler(webapp2.RequestHandler):
 class Games(db.Model):
     game_creation_time = db.DateTimeProperty(auto_now_add=True)
     #dimension = db.IntegerProperty(required=True)
-    player1_name = db.StringProperty(required=True)
-    player2_name = db.StringProperty(required=True)
-    player1_color = db.StringProperty(required=True)
-    player2_color = db.StringProperty(required=True)
-    player1_email = db.StringProperty(required=True)
-    player2_email = db.StringProperty(required=True)
-    gameplay_key = db.StringProperty(required=True)
-    player1_link = db.StringProperty(required=True)
-    player2_link = db.StringProperty(required=True)
+    # player1_name = db.StringProperty(required=True)
+    # player2_name = db.StringProperty(required=True)
+    # player1_color = db.StringProperty(required=True)
+    # player2_color = db.StringProperty(required=True)
+    # player1_email = db.StringProperty(required=True)
+    # player2_email = db.StringProperty(required=True)
+    # gameplay_key = db.StringProperty(required=True)
+    # player1_link = db.StringProperty(required=True)
+    # player2_link = db.StringProperty(required=True)
     moves = db.TextProperty(required=True)
+    game_info = db.TextProperty(required=True)
+    @classmethod
+    def init_entity(cls, p1n, p2n, 
+                    p1eml, p2eml, p1_key, 
+                    p2_key, game_key):
+        init_moves = pickle.dumps([])
+        init_game = pickle.dumps({
+                                        'p1_name': p1n,
+                                        'p2_name': p2n,
+                                        'p1_email': p1eml,
+                                        'p2_email': p2eml,
+                                        'p1_key': p1_key,
+                                        'p2_key': p2_key,
+                                        'game_key': game_key
+                                    })
+        game_to_put = Games(
+            moves = init_moves,
+            game_info = init_game
+        )
+        game_to_put.put()
 
+    @classmethod
+    def player_keyz(cls):
+        games = Games.all()
+        total_keys = []
+        for g in games:
+            total_keys.append(load_game_info(g)['p1_key'])
+            total_keys.append(load_game_info(g)['p2_key'])
+        return total_keys
+
+    @classmethod
+    def by_link(cls, link):
+        for g in Games.all():
+            p1_link = load_game_info(g)['p1_key']
+            if link == p1_link:
+                return g
+            else:
+                p2_link = load_game_info(g)['p2_key']
+                if link == p2_link:
+                    return g
+
+    @classmethod 
+    def game_keys(cls):
+        game_keys = []
+        for g in Games.all():
+            game_keys.append(load_game_info(g)['game_key'])
+        return game_keys
+
+def load_game_info(game_object):
+    return pickle.loads(game_object.game_info)
+
+def load_moves(game_obj):
+    return pickle.loads(game_obj.moves)
+
+def create_player_key():
+    return "".join([get_hash()[random.randrange(0, len(get_hash()))] for n in range(10)])
+
+def create_game_key():
+    return "".join([get_hash()[random.randrange(0, len(get_hash()))] for n in range(15)])
+
+def get_hash():
+    return string.letters + string.digits
+def get_keys():
+    games = Games.all()
+
+    if games.count() == 0:
+        p1_key = create_player_key()
+        p2_key = create_player_key()
+        game_key = create_game_key()
+        while p2_key == p1_key:
+            p2_key = create_player_key()
+
+        return (p1_key, p2_key, game_key)
+    else:
+        player_keys = Games.player_keyz()
+        game_keys = Games.game_keys()
+        p1_key = create_player_key()
+        p2_key = create_player_key()
+        game_key = create_game_key()
+        keys_to_put = validate_keys(player_keys, game_keys, game_key, p1_key, p2_key)
+        return keys_to_put
     
+def valid_players(p1e, p2e, p1n, p2n):
+    name_re = re.compile(r"^(?i)[a-z0-9_-]{1,20}$")
+    if mail.is_email_valid(p1e) != True or mail.is_email_valid(p2e) != True:
+        return False
+    else:
+        if not name_re.match(p1n) or not name_re.match(p2n):
+            return False
+    return True
+
+
+def validate_keys(pk, gks, gk, p1k, p2k):
+    while p1k in pk:
+        p1k = create_player_key()
+    while p2k in pk:
+        p2k = create_player_key()
+    while gk in gks:
+        gk = create_game_key()
+    return (p1k, p2k, gk)
+
+def send_mailkeys(p1k, p1n, p2k, p2n, p1e, p2e):
+    sender = 'anytime-go support <anytime-go@appspot.gserviceaccount.com>'
+    body = """
+Hey %s,
+
+    You have successfully started a Game of Go with %s. Here is your special game link! %s
+    %s will have a specific link for his/her game as well. It would be wise not to tell anyone this link
+    because whoever has it will have access to your game. 
+
+    Enjoy!
+
+Sincerely,
+Anytime-go Team.
+""" 
+    player1_info = (p1n, p2n.capitalize(), p1k, p2n.capitalize())
+    player2_info = (p2n, p1n.capitalize(), p2k, p1n.capitalize())
+    p1_body, p2_body = (body % player1_info, body % player2_info)
+
+    mail.send_mail(sender=sender, 
+                    to=p1e, 
+                    subject=p1n + "'s" + " Game Link", 
+                    body=p1_body)
+
+    mail.send_mail(sender=sender, 
+                    to=p2e,
+                    subject = p1n + "'s" + " Game Link",
+                    body=p2_body)
+
+def init_and_dump_player(p1n, p2n, p1eml, p2eml):
+    p1_key, p2_key, game_key = get_keys()
+    send_mailkeys(p1_key, p1n, p2_key, p2n, p1eml, p2eml)
+    Games.init_entity(p1n, p2n, p1eml, p2eml, p1_key, p2_key, game_key)
+    
+def delete_hoes():
+    db.delete(Games.all())
+
 class HomePage(MainHandler):
     def get(self):
-        games=Games.all()
-        self.render("home.html", games=games)
+        games = Games.all()
+        db.delete(games)
+        data = []
+        for g in games:
+            data.append([load_moves(g), load_game_info(g)])
+        self.render("home.html", data=data)
     def post(self):
 
-        d = 'abcdefghijklmnopqrstuvwxyz123456789'
-        games = Games.all()
-        total_links = []
-        total_gameplay_keys = []
-        for game in games:
-            link = game.gameplay_key
-            total_gameplay_keys.append(link)
-            p1_link = game.player1_link
-            p2_link = game.player2_link
-            total_links.append(p1_link)
-            total_links.append(p2_link)
+        #check if incoming data is valid, if not render errors
+        #if the data is valid, then we initialize a db entity for the incoming data
+        #next we retrieve gameplay, p1, and p2 links for each game
+        #then we create a random p1, p2, and gameplay key for the new game being created
+        #then we check to make sure that those keys do not match any other keys in the db games
+        #if we have uniques keys for our new game then we store the data in the db
+        #finally we email the players their specific links for their game
+        try:
+            player_1name = self.request.get("player1_name")
+            player_1email = self.request.get("p1_email")
+            player_2name = self.request.get("player2_name")
+            player_2email = self.request.get("p2_email")
 
-        player1_key = "".join([d[random.randrange(0, len(d))] for x in range(10)])
-        player2_key = "".join([d[random.randrange(0, len(d))] for x in range(10)])
+            if valid_players(player_1email, player_2email, player_1name, player_2name):
+                init_and_dump_player(player_1name, player_2name, player_1email, player_2email)
+                self.write("Your game has successfully been created")
+            else:
+                self.write("something went wrong bro")
 
-        while player1_key in total_links:
-            player1_key = "".join([d[random.randrange(0, len(d))] for x in range(10)])
-        total_links.append(player1_key)
+        except Exception as e:
+            self.write("The server cannot process your request" + ' ' + str(e))
 
-        while player2_key in total_links:
-            player2_key = "".join([d[random.randrange(0, len(d))] for x in range(10)])
-
-        gameplay_temp_file_name = "".join([d[random.randrange(0, len(d))] for x in range(20)])
-
-        while gameplay_temp_file_name in total_gameplay_keys:
-            gameplay_temp_file_name = "".join([d[random.randrange(0, len(d))] for x in range(20)])
-
-        moves = []
-        pickle_moves_string = pickle.dumps(moves)
-        new_game = Games(
-                        player1_name = self.request.get('player1_name'),
-                        player2_name = self.request.get('player2_name'),
-                        player1_color = self.request.get('p1_color'),
-                        player2_color = self.request.get('p2_color'),
-                        player1_email = self.request.get('p1_email'),
-                        player2_email = self.request.get('p2_email'),
-                        gameplay_key = gameplay_temp_file_name,
-                        player1_link = player1_key,
-                        player2_link = player2_key,
-                        moves = pickle_moves_string
-                    )
-        new_game.put()
-        # add code here to send email to each player
-
-        self.write('game has been created')
+def get_current_player_info(game, address):
+    game_info = load_game_info(game)
+    if game_info['p1_key'] == address:
+        return [1, 'black', game_info['p1_name'].capitalize()]
+    elif game_info['p2_key'] == address:
+        return [2, 'white', game_info['p2_name'].capitalize()]
 
 class PlayGame(MainHandler):
     def get(self):
-        current_url = self.request.url
-        player_number = None
-        player_color = None
-        player_name = None
-        current_game = None
-        link = current_url[23:]
-        games = Games.all()
-        for game in games:
-            if game.player1_link == link:
-                player_number = 1
-                player_color = game.player1_color
-                player_name = game.player1_name
-                current_game = game
-                break
-            elif game.player2_link == link:
-                player_number = 2
-                player_color = game.player2_color
-                player_name = game.player2_name
-                current_game = game
-                break
-        # current_game.moves = pickle.dumps([])
-        # current_game.put()
-        moves = pickle.loads(current_game.moves)
-        player_data=[player_number, player_color, player_name]
-        #self.write((moves, player_data))
-        brand_new_game = False
-        if len(moves) == 0:
-            brand_new_game = True
-        self.render('displayboard.html',
-                    move_history=moves,
-                    player_info=player_data, 
-                    is_brand_new=brand_new_game
-                    )
+        link = self.request.url[23:]
+        try:
+            game = Games.by_link(link)
+            player_data = get_current_player_info(game, link)
+            if game != None:
+                moves = load_moves(game)
+                self.render('displayboard.html', 
+                            move_history = moves, 
+                            player_info = player_data)
+        except Exception as e:
+            self.write(str(e))
+   
     def post(self):
-        form_submit = self.request.get('subm')
-        if form_submit == 'submit_move':
+        form_submitted = self.request.get("subm")
+        if form_submitted == 'submit_move':
             opposing_colors = {'b':'w', 'w':'b'}
             new_moves = self.request.get("move_to_add_db")
             link = self.request.url[23:]
-            games = Games.all()
-            curr_game = None
-            player_number = None
-            player_color = None
-            player_name = None
-            
-            for game in games:
-                if game.player1_link == link:
-                    player_number = 1
-                    player_color = game.player1_color
-                    player_name = game.player1_name
-                    curr_game = game
-                    break
-                elif game.player2_link == link:
-                    player_number = 2
-                    player_color = game.player2_color
-                    player_name = game.player2_name
-                    curr_game = game
-                    break
+            game = Games.by_link(link)
+            player_data = get_current_player_info(game, link)
 
-            moves_db = pickle.loads(curr_game.moves)
+            moves = load_moves(game)
+
             if new_moves != 'pass':
                 new_moves = new_moves.split(',')
-                moves_db.append(new_moves)
+                moves.append(new_moves)
             else:
-            #black will always start first
-                if len(moves_db) == 0:
-                    moves_db.append(['1', 'b', 'pass'])
+        #     #black will always start first
+                if len(moves) == 0:
+                    moves.append(['1', 'b', 'pass'])
                 else:
-                    last_move = moves_db[len(moves_db)-1]
+                    last_move = moves[len(moves)-1]
                     turnIncremented = int(last_move[0]) + 1
                     color_of_passer = opposing_colors[last_move[1]]
-                    moves_db.append([str(turnIncremented), color_of_passer, 'pass'])
+                    moves.append([str(turnIncremented), color_of_passer, 'pass'])
     
-            curr_game.moves = pickle.dumps(moves_db)
-            curr_game.put()
+            game.moves = pickle.dumps(moves)
+            game.put()
 
-            player_data=[player_number, player_color, player_name]
             self.render("displayboard.html",
-                    move_history = moves_db,
+                    move_history = moves,
                     player_info = player_data,
-                    is_brand_new = False
                     )
-        elif form_submit == 'submit_ajax':
+        elif form_submitted == 'submit_ajax':
             link = self.request.url[23:]
-            curr_game = None
-            games = Games.all()
-            for game in games:
-                if game.player1_link == link or game.player2_link == link:
-                    curr_game = game
-                    break
-            length_of_moves = len(pickle.loads(curr_game.moves)) 
+            game = Games.by_link(link)
+            length_of_moves = len(load_moves(game)) 
             output = json.dumps(length_of_moves)
             self.write(output)
-        
-#we should have a seperate db class called keys, that stores the game key for each set of player1 and player 2
-#games = Games.all()
 
-# black_links = []
-# white_links = []
-# # dylan change this later
-# for game in games:
-#     if game.player1_color == 'black':
-#         black_links.append(game.player1_link)
-#         white_links.append(game.player2.link)
-#     else:
-#         black_links.append(game.player1_link)
-#         white_links.append(game.player2.link)
-
-# new_urls = []
-# for black_link in black_links:
-#     new_urls.append([black_link, PlayGameAsBlack])
-# for white_link in white_links:
-#     new_urls.append([white_link, PlayGameAsWhite])
-
-
-
-    
 app = webapp2.WSGIApplication([
     ('/', HomePage),
-    (r'/[a-z0-9]+', PlayGame)
+    (r'/[a-zA-Z0-9]+', PlayGame)
 ], debug=True)

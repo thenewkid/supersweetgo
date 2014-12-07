@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<style>
+	* {
+		box-sizing: border-box;
+		border: 1px solid blue;
+	}
+		#current_turn {
+			box-sizing: border-box;
+			border: 1px solid blue;
+		}
+	</style>
 	<script src="/js/readData.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
 	</script>
@@ -29,9 +39,6 @@
 {% endif %}
 <body>
 	<div id="current_turn"></div>
-	<div>Welcome {{player_info[2]}}</div>
-	<div>Player {{player_info[0]}}</div>
-	<div>Player Color: {{player_info[1]}}</div>
 	<div style="text-align:center">
 	<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e"></canvas>
 	</div>

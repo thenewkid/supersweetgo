@@ -5,6 +5,46 @@ var PIECE_WIDTH = 16;
 var playerColor;
 var currentMoveData = [];
 var ajaxCalling;
+var board = [];
+
+function getEmptyBoard() {
+	var b = [];
+	for (var i = 0; i < 19; i++) {
+		var a = [];
+		for (var j = 0; j < 19; j++) {
+			a.push('e');
+		}
+		b.push(a);
+	}
+	return b;
+}
+function updateBoard(board, x, y, col) {
+	var updatedObject = {};
+	var b = board;
+
+	//1. place piece on board
+	b[x][y] = col;
+
+	//2. check for captured stones and remove any
+	
+
+	//3. return board, number of white and black stones captured
+}
+function makeBoard(move_history) {
+	//iterate through move history that comes from the server
+	//for each postion we grab the 3rd and fourth element because that is the position of the piece
+	//next we find the corresponding position in our 2d array based on the position in move_history
+	//finally we add this move into our board array
+	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
+	var currentBoard = getEmptyBoard();
+	for (var i = 0; i < move_history.length; i++) {
+		var currentTurn = move_history[i];
+		var x = x_letters.indexOf(currentTurn[2]);
+		var y = currentTurn[3]-1;
+		updateBoard(currentBoard, x, y, currentTurn[1])
+	}
+	return currentBoard;
+}
 function each(array, funky) {
 	for (var i = 0; i < array.length; i++)
 		funky(array[i]);
@@ -37,18 +77,8 @@ function showData() {
 }
 
 function getXYCoords(letter,number) {
-	// letter maps to x
-	// number maps to y
 	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
-	var letter_index = 0;
-	//Dustin you are retarted, you can replace the for loop with
-	//letter_index = x_letters.indexOf(letter);
-	for (index = 0; index < x_letters.length; index++) {
-		if (x_letters[index].toLowerCase() == letter.toLowerCase()) {
-			letter_index = index;
-		}
-	}
-
+	var letter_index = x_letters.indexOf(letter.toUpperCase());
 	var letter_index_x = (letter_index * CELL_SPACING) + CELL_SPACING;
 	var number_index_y = (number * CELL_SPACING);
 	return [letter_index_x,number_index_y];
