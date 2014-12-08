@@ -43,16 +43,6 @@ class MainHandler(webapp2.RequestHandler):
 
 class Games(db.Model):
     game_creation_time = db.DateTimeProperty(auto_now_add=True)
-    #dimension = db.IntegerProperty(required=True)
-    # player1_name = db.StringProperty(required=True)
-    # player2_name = db.StringProperty(required=True)
-    # player1_color = db.StringProperty(required=True)
-    # player2_color = db.StringProperty(required=True)
-    # player1_email = db.StringProperty(required=True)
-    # player2_email = db.StringProperty(required=True)
-    # gameplay_key = db.StringProperty(required=True)
-    # player1_link = db.StringProperty(required=True)
-    # player2_link = db.StringProperty(required=True)
     moves = db.TextProperty(required=True)
     game_info = db.TextProperty(required=True)
     @classmethod
@@ -60,15 +50,9 @@ class Games(db.Model):
                     p1eml, p2eml, p1_key, 
                     p2_key, game_key):
         init_moves = pickle.dumps([])
-        init_game = pickle.dumps({
-                                        'p1_name': p1n,
-                                        'p2_name': p2n,
-                                        'p1_email': p1eml,
-                                        'p2_email': p2eml,
-                                        'p1_key': p1_key,
-                                        'p2_key': p2_key,
-                                        'game_key': game_key
-                                    })
+        d = {'p1_name': p1n, 'p2_name': p2n, 'p1_email': p1eml,'p2_email': p2eml,'p1_key': p1_key, 'p2_key': p2_key,'game_key': game_key
+            }
+        init_game = pickle.dumps(d)
         game_to_put = Games(
             moves = init_moves,
             game_info = init_game
@@ -156,11 +140,11 @@ def validate_keys(pk, gks, gk, p1k, p2k):
     return (p1k, p2k, gk)
 
 def send_mailkeys(p1k, p1n, p2k, p2n, p1e, p2e):
-    sender = 'anytime-go support <anytime-go@appspot.gserviceaccount.com>'
+    sender = 'anytime-go support <cyberkid108@gmail.com>'
     body = """
 Hey %s,
 
-    You have successfully started a Game of Go with %s. Here is your special game link! %s
+    You have successfully started a Game of Go with %s. Here is your special game link! www.supersweetgo.appspot.com/%s
     %s will have a specific link for his/her game as well. It would be wise not to tell anyone this link
     because whoever has it will have access to your game. 
 
@@ -187,18 +171,15 @@ def init_and_dump_player(p1n, p2n, p1eml, p2eml):
     p1_key, p2_key, game_key = get_keys()
     send_mailkeys(p1_key, p1n, p2_key, p2n, p1eml, p2eml)
     Games.init_entity(p1n, p2n, p1eml, p2eml, p1_key, p2_key, game_key)
-    
+
 def delete_hoes():
     db.delete(Games.all())
 
 class HomePage(MainHandler):
     def get(self):
-        games = Games.all()
-        db.delete(games)
-        data = []
-        for g in games:
-            data.append([load_moves(g), load_game_info(g)])
+        data = [[load_moves(g), load_game_info(g)] for g in Games.all()]
         self.render("home.html", data=data)
+
     def post(self):
 
         #check if incoming data is valid, if not render errors
@@ -229,10 +210,17 @@ def get_current_player_info(game, address):
         return [1, 'black', game_info['p1_name'].capitalize()]
     elif game_info['p2_key'] == address:
         return [2, 'white', game_info['p2_name'].capitalize()]
+def get_url_ind(l):
+    index_double_slash = l.index('//')+2
+    distance_to_add = len(l[:index_double_slash])
+    next_part = l[index_double_slash:].index('/')+distance_to_add+1
+    final = l[next_part:]
+    return final
 
 class PlayGame(MainHandler):
     def get(self):
-        link = self.request.url[23:]
+        current_url = self.request.url
+        link = get_url_ind(current_url)
         try:
             game = Games.by_link(link)
             player_data = get_current_player_info(game, link)
@@ -249,7 +237,7 @@ class PlayGame(MainHandler):
         if form_submitted == 'submit_move':
             opposing_colors = {'b':'w', 'w':'b'}
             new_moves = self.request.get("move_to_add_db")
-            link = self.request.url[23:]
+            link = get_url_ind(self.request.url)
             game = Games.by_link(link)
             player_data = get_current_player_info(game, link)
 
@@ -276,7 +264,7 @@ class PlayGame(MainHandler):
                     player_info = player_data,
                     )
         elif form_submitted == 'submit_ajax':
-            link = self.request.url[23:]
+            link = get_url_ind(self.request.url)
             game = Games.by_link(link)
             length_of_moves = len(load_moves(game)) 
             output = json.dumps(length_of_moves)

@@ -15,7 +15,7 @@
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
 	</script>
 </head>
-{% if not is_brand_new %}
+
 	{% for move in move_history %}
 		{% if move[2] == 'pass' %}
 			<script>
@@ -36,16 +36,20 @@
 			</script>
 		{% endif %}
 	{% endfor %}
-{% endif %}
 <body>
-	<div id="current_turn"></div>
-	<div style="text-align:center">
-	<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e"></canvas>
+	<div>
+		<div id="current_turn"></div>
+
+		<div>
+			<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e"></canvas>
+		</div>
+		<div>
+			<form method="post" name="next_turn">
+				<input type='hidden' name='move_to_add_db' value='' id="u_m">
+				<button type='submit' id="submit_hoes_to_the_pimp" value='submit_move' name='subm'>Submit Move</button>
+			</form>
+		</div>
 	</div>
-	<form method="post" name="next_turn">
-		<input type='hidden' name='move_to_add_db' value='' id="u_m">
-		<button type='submit' id="submit_hoes_to_the_pimp" value='submit_move' name='subm'>Submit Move</button>
-	</form>
 </body>
 </html>
 <script>
