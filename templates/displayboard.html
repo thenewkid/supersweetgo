@@ -6,11 +6,33 @@
 		box-sizing: border-box;
 		border: 1px solid blue;
 	}
-		#current_turn {
-			box-sizing: border-box;
-			border: 1px solid blue;
-		}
+	#current_turn {
+		border: 1px solid blue;
+	}
+	body {
+		background-color: black;
+		color: white;
+	}
+	#game_container {
+		flex-wrap: wrap;
+	}
+	#whose_turn {
+		text-align: center;
+		font-family: 'Arvo', serif;
+		font-size: 2em;
+
+	}
+	#submit_move_form {
+		text-align: center;
+	}
+	#submit_move_form button[type="submit"] {
+		width: 15
+	}
+	#picasso_canvas {
+		text-align: center;
+	}
 	</style>
+	<link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
 	<script src="/js/readData.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js">
 	</script>
@@ -37,18 +59,20 @@
 		{% endif %}
 	{% endfor %}
 <body>
-	<div>
-		<div id="current_turn"></div>
-
-		<div>
-			<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e"></canvas>
+	<div id="game_container">
+		<div id="game_status">
+			<div id="whose_turn"></div>
+			<div id="submit_move_form">
+				<form method="post" name="next_turn">
+					<input type='hidden' name='move_to_add_db' value='' id="u_m">
+					<button type='submit' id="submit_hoes_to_the_pimp" value='submit_move' name='subm'>Submit Move</button>
+				</form>
+			</div>
 		</div>
-		<div>
-			<form method="post" name="next_turn">
-				<input type='hidden' name='move_to_add_db' value='' id="u_m">
-				<button type='submit' id="submit_hoes_to_the_pimp" value='submit_move' name='subm'>Submit Move</button>
-			</form>
+		<div id="picasso_canvas">
+			<canvas width="700px" height="700px" style="border: 2px groove silver; background-color: #ecb05e;"></canvas>
 		</div>
+		
 	</div>
 </body>
 </html>

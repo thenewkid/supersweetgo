@@ -7,6 +7,9 @@ var currentMoveData = [];
 var ajaxCalling;
 var board = [];
 
+function getLastMove() {
+	return moveHistory[moveHistory.length-1];
+}
 function getEmptyBoard() {
 	var b = [];
 	for (var i = 0; i < 19; i++) {
@@ -31,10 +34,6 @@ function updateBoard(board, x, y, col) {
 	//3. return board, number of white and black stones captured
 }
 function makeBoard(move_history) {
-	//iterate through move history that comes from the server
-	//for each postion we grab the 3rd and fourth element because that is the position of the piece
-	//next we find the corresponding position in our 2d array based on the position in move_history
-	//finally we add this move into our board array
 	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 	var currentBoard = getEmptyBoard();
 	for (var i = 0; i < move_history.length; i++) {
@@ -215,13 +214,6 @@ function checkSpotPosition(currentMoveArray) {
 }
 function callAjaxNigga() {
 	$.ajax({
-		
-		//all ajax does is send a post request asking for the length of the moves from the server
-		//if this length is higher, then we reload the page, 
-		//a better way to do this might be to send the current length of the move History to ther server
-		//and if the length of the move history on the server is greater than the one we sent then
-		//we send the new move history array of data as json homie 
-		
 
 		type: 'POST',
 		data: {'subm': 'submit_ajax'},
@@ -232,14 +224,12 @@ function callAjaxNigga() {
 				clearInterval(ajaxCalling);
 				var chill = window.location;
 				window.location = chill.protocol + '//' + chill.host + chill.pathname;
-
 			}
 		}
-	})
+	});
 }
 function removeSubmitButton() {
-	var button = document.getElementById("submit_hoes_to_the_pimp");
-	document.next_turn.removeChild(button);
+	document.getElementById("submit_move_form").innerHTML = "";
 }
 function init() {
 	var canvas = document.querySelector("canvas");
@@ -248,7 +238,7 @@ function init() {
 	drawGoPieces(surface);
 
 	var colorOpp = {'b':'white', 'w':'black'}
-	var currentPlayerTurn = document.getElementById('current_turn');
+	var currentPlayerTurn = document.getElementById('whose_turn');
 	var lastPlayerTurnColor;
 
 	if (moveHistory.length == 0) {
@@ -273,26 +263,31 @@ function init() {
 		}
 	}
 }
+function setFormSubmit() {
+	var form = document.next_turn;
+	if (form) {
+		$(form).submit(function() {
+			if (hasPieceBeenDrawn) {
+				currentMoveData[0]++;
+				form.move_to_add_db.value = currentMoveData.join(',');
+				return true;
+			}
+			else {
+				var confirmPass = confirm("Are you sure you want to pass?");
+				if (confirmPass) {
+					form.move_to_add_db.value = 'pass';
+					return true;
+				}
+				else
+					return false;
+			}
+		});
+	}
+}
 window.onload = function() {
 	console.log(moveHistory);
 	init();
-	var form = document.next_turn;
-	$(form).submit(function() {
-		if (hasPieceBeenDrawn) {
-			currentMoveData[0]++;
-			form.move_to_add_db.value = currentMoveData.join(',');
-			return true;
-		}
-		else {
-			var confirmPass = confirm("Are you sure you want to pass?");
-			if (confirmPass) {
-				form.move_to_add_db.value = 'pass';
-				return true;
-			}
-			else
-				return false;
-		}
-	});
+	setFormSubmit();
 }
 
 //once the user has clicked, do we want to have a button that says undo move so that they can pass after already placing a go PIECE_WIDTH

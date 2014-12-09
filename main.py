@@ -207,15 +207,20 @@ class HomePage(MainHandler):
 def get_current_player_info(game, address):
     game_info = load_game_info(game)
     if game_info['p1_key'] == address:
-        return [1, 'black', game_info['p1_name'].capitalize()]
+        return [1, 'black', game_info['p1_name'].capitalize(), game_info['p2_name'].capitalize()]
     elif game_info['p2_key'] == address:
-        return [2, 'white', game_info['p2_name'].capitalize()]
+        return [2, 'white', game_info['p2_name'].capitalize(), game_info['p1_name'].capitalize()]
+
 def get_url_ind(l):
     index_double_slash = l.index('//')+2
     distance_to_add = len(l[:index_double_slash])
     next_part = l[index_double_slash:].index('/')+distance_to_add+1
     final = l[next_part:]
     return final
+
+def restart_game(g):
+    g.moves = pickle.dumps([])
+    g.put()
 
 class PlayGame(MainHandler):
     def get(self):
@@ -269,8 +274,14 @@ class PlayGame(MainHandler):
             length_of_moves = len(load_moves(game)) 
             output = json.dumps(length_of_moves)
             self.write(output)
+            
 
 app = webapp2.WSGIApplication([
     ('/', HomePage),
     (r'/[a-zA-Z0-9]+', PlayGame)
 ], debug=True)
+#current tasks bitches
+#update the canvas so the go pieces arent touching the coords
+#make the board resize based on page_width
+#add function that checks to see iftwo passes are made in a row, if so get points and end game
+#get the page looking nice
