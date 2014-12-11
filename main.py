@@ -239,13 +239,12 @@ class PlayGame(MainHandler):
    
     def post(self):
         form_submitted = self.request.get("subm")
+        link = get_url_ind(self.request.url)
         if form_submitted == 'submit_move':
             opposing_colors = {'b':'w', 'w':'b'}
             new_moves = self.request.get("move_to_add_db")
-            link = get_url_ind(self.request.url)
             game = Games.by_link(link)
             player_data = get_current_player_info(game, link)
-
             moves = load_moves(game)
 
             if new_moves != 'pass':
@@ -263,18 +262,18 @@ class PlayGame(MainHandler):
     
             game.moves = pickle.dumps(moves)
             game.put()
+            self.render(
+                "displayboard.html",
+                move_history = moves,
+                player_info = player_data,
+            )
 
-            self.render("displayboard.html",
-                    move_history = moves,
-                    player_info = player_data,
-                    )
         elif form_submitted == 'submit_ajax':
             link = get_url_ind(self.request.url)
             game = Games.by_link(link)
             length_of_moves = len(load_moves(game)) 
             output = json.dumps(length_of_moves)
             self.write(output)
-            
 
 app = webapp2.WSGIApplication([
     ('/', HomePage),
@@ -284,4 +283,5 @@ app = webapp2.WSGIApplication([
 #update the canvas so the go pieces arent touching the coords
 #make the board resize based on page_width
 #add function that checks to see iftwo passes are made in a row, if so get points and end game
-#get the page looking nice
+#add length for playgame url mapping
+#implement the capture stones algorithm
