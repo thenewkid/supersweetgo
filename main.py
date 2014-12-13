@@ -177,6 +177,7 @@ def delete_hoes():
 
 class HomePage(MainHandler):
     def get(self):
+        
         data = [[load_moves(g), load_game_info(g)] for g in Games.all()]
         self.render("home.html", data=data)
 

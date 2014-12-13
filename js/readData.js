@@ -6,10 +6,23 @@ var playerColor;
 var currentMoveData = [];
 var ajaxCalling;
 var board = [];
-
+var colorOpp = {'b':'white', 'w':'black'};
+//the 4 functions below the globals are for returning specific information
+//about the last move in moveHistory;
 function getLastMove() {
 	return moveHistory[moveHistory.length-1];
 }
+function getLastMoveColor() {
+	return getLastMove()[1];
+}
+function getLastMoveTurn() {
+	return getLastMove()[0];
+}
+function getLastMoveCoords() {
+	return [getLastMove()[2], getLastMove()[3]];
+}
+
+//creates and returns a 19 X 19 2d list all filled with 'e'
 function getEmptyBoard() {
 	var b = [];
 	for (var i = 0; i < 19; i++) {
@@ -21,7 +34,32 @@ function getEmptyBoard() {
 	}
 	return b;
 }
-function getSurroundingStones(board, ex, why) {
+
+//getCapturedStones takes in an opposite_stone of the current piece
+//we are looking at. The opposite_stone param will be 
+//an array with 3 elements, the color of the stone were checking, its x and y values
+function getCapturedStones(opposite_stone, x, y) {
+	var capture_color = opposite_stone[0]
+	var stones_to_be_captured = [];
+	var surrounding = getSurroundingStones(opposite_stone[1], opposite_stone[2])
+	if (sourrounding.length == 4) {
+		for (var i = 0; i < surrounding.length; i++) {
+			var s  = surrounding[i];
+			if (s[1] != x && s[2] != y && s[0] == capture_color) {
+				//
+			}
+		}
+		stones_to_be_captured.append(opposite_stone)
+	}
+	return stones_to_be_captured;	
+}
+
+//takes in an x and y spot on our 2D board and returns a 2D array
+//the arrays in the array will have length of 3 and only possible sides of the stone
+//first element in the array is the color: posibilities of color are
+//'e' for empty: 'w' for white, and 'b' for black
+//the next 2 elements [1] and [2] are the x and y coords
+function getSurroundingStones(ex, why) {
 	//coords of sourrounding pieces
 	var west = null;
 	var east = null;
@@ -41,14 +79,17 @@ function getSurroundingStones(board, ex, why) {
 
 	return surr_stone_cols
 }
+
+//takes in a list of surrounding stones and color of current stone
+//returns a list of opposite colored stones if any
 function getOpposite(stone_args, current_color) {
 	opposite_cols = []
 	each(stone_args, function(e) {
-		if (e[0] != current_color) opposite_cols.append(e);
+		if (e[0] != current_color && e[0] != 'e') opposite_cols.append(e);
 	})
 	return opposite_cols;
 }
-function updateBoard(board, x, y, col) {
+function updateBoard(x, y, col) {
 	board[x][y] = col;
 	var oppositeStones = null;
 	//capture stones alogrithm
@@ -72,6 +113,8 @@ function updateBoard(board, x, y, col) {
 			//we have opposite stones in our adjacent stones
 			//we loop through the opposite stones
 			each(oppositeStones, function(e) {
+				//[['c', 1, 2]]
+				var capturedStones = getCapturedStones(e, x, y);
 
 			})
 		}
@@ -83,14 +126,16 @@ function updateBoard(board, x, y, col) {
 }
 function makeBoard() {
 	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
-	var bored = getEmptyBoard();
+	board = getEmptyBoard();
 	for (var i = 0; i < moveHistory.length; i++) {
 		var currentTurn = moveHistory[i];
-		var x = x_letters.indexOf(currentTurn[2]);
-		var y = currentTurn[3]-1;
-		bored = updateBoard(bored, x, y, currentTurn[1])
+		if (currentTurn[2] != 'pass') {
+			var x = x_letters.indexOf(currentTurn[2]);
+			var y = currentTurn[3]-1;
+			board[y][x] = currentTurn[1];
+			//updateBoard(board, x, y, currentTurn[1])
+		}
 	}
-	return bored;
 }
 function each(array, funky) {
 	for (var i = 0; i < array.length; i++)
@@ -104,13 +149,33 @@ function setCurrentColor(c) {
 }
 function drawGoPieces(surface) {
 	if (moveHistory.length > 0) {
-		for (var m = 0; m < moveHistory.length; m++) {
-			if (moveHistory[m][2] != 'pass') {
-				var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
-				drawGoPiece(surface, positionArray[0], positionArray[1], moveHistory[m][1]);
+		makeBoard();
+		for (var x = 0; x < board.length; x++) {
+			for (var y = 0; y < board[x].length; y++) {
+				if (board[x][y] != 'e') {
+					var coords = getXY(x, y);
+					console.log(coords);
+					drawGoPiece(surface, coords[0], coords[1], board[x][y])
+				}	
 			}
-		}	
+		}
 	}
+}
+	// 	for (var m = 0; m < moveHistory.length; m++) {
+	// 		if (moveHistory[m][2] != 'pass') {
+	// 			var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
+	// 			drawGoPiece(surface, positionArray[0], positionArray[1], moveHistory[m][1]);
+	// 		}
+	// 	}	
+	// }
+	//if movehistory > 0 we call makeBoard()
+	//that will set our global board to be set
+	//then we loop through our 2d board
+	//if the current element != 'e', then we call drawGoPiece(surface, )
+function getXY(x, y) {
+	var ex = (y+1)*35;
+	var y = (x+1)*35;
+	return [ex,y];
 }
 function addToData(turn, color, x, y) {
 	moveHistory.push([turn, color, x, y]);
@@ -200,6 +265,15 @@ function drawBoard(surface, canvas) {
 		surface.fillText(x_letters[k], x-42, CELL_SPACING-15)
 	}
 }
+function coordsToBoardDim(ix, iy) {
+	var boardX = (ix / 35)-1;
+	var boardY = (iy /35)-1;
+	return [boardY, boardX];
+}
+function checkIfTaken(arr) {
+	var spot = board[arr[0]][arr[1]];
+	return spot != 'e';
+}
 function addCanvasListener(canvas, surface) {
 	canvas.addEventListener('click', function(e) {
 		var canvasRect = this.getBoundingClientRect();
@@ -207,15 +281,17 @@ function addCanvasListener(canvas, surface) {
 		var gy = e.y - canvasRect.top;
 		var igx = nearestIntersectionCoord(gx); 
 		var igy = nearestIntersectionCoord(gy);
+		var boardDimClicked = coordsToBoardDim(igx, igy);
+		var isSpotTaken = checkIfTaken(boardDimClicked);
 		var movePosition = getLetterNumberCoords(igx, igy);
-		var isSpotTaken = checkSpotPosition(movePosition);
+		//var isSpotTaken = checkSpotPosition(movePosition);
 		//alert(igx + ' ' + igy);
 		if (isSpotTaken) 
 			alert("Please select a different spot");
 		else {
 			var turnToIncrement = 0;
 			if (moveHistory.length > 0) 
-				turnToIncrement = moveHistory[moveHistory.length-1][0];
+				turnToIncrement = getLastMoveTurn();
 
 			if (currentMoveData.length == 0) {
 				currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
@@ -257,6 +333,26 @@ function checkSpotPosition(currentMoveArray) {
 	return false;
 
 }
+function setAjaxPosting() {
+	//we set the page to post every 10 seconds
+	//every 10 seconds we get the 
+	//get mouse coords every 20 seconds
+	//if mouse coords are the same then we stop
+}
+function setAjax(timer) {
+	ajaxCalling = window.setInterval(callAjaxNigga, timer);
+}
+function clearAjax() {
+	clearInterval(ajaxCalling);
+}
+function reloadPage() {
+	var chill = window.location;
+	window.location = chill.protocol + '//' + chill.host + chill.pathname;
+}
+function refresh() {
+	clearAjax();
+	reloadPage();
+}
 function callAjaxNigga() {
 	$.ajax({
 
@@ -266,9 +362,7 @@ function callAjaxNigga() {
 		success: function(movesLengthFromServer) {
 			
 			if (movesLengthFromServer > moveHistory.length) {
-				clearInterval(ajaxCalling);
-				var chill = window.location;
-				window.location = chill.protocol + '//' + chill.host + chill.pathname;
+				refresh();
 			}
 		}
 	});
@@ -276,36 +370,58 @@ function callAjaxNigga() {
 function removeSubmitButton() {
 	document.getElementById("submit_move_form").innerHTML = "";
 }
+function isBeginning() {
+	return moveHistory.length == 0;
+}
+function setBlackFirst(turn_element) {
+	turn_element.innerHTML = "Black Goes First";
+}
+function applyNoTurn(cvas) {
+	addNotYourTurnListener(cvas);
+	removeSubmitButton();
+	setAjax(10000);
+}
+
+function setHtml(html_element, content) {
+	html_element.innerHTML = content;
+}
+
+function setTurn(canvas, surface) {
+	var turn_ele = document.getElementById("whose_turn");
+	setHtml(turn_ele, colorOpp[getLastMoveColor()].toUpperCase() + "'s Turn");
+	lastPlayerTurnColor = getLastMoveColor();
+	if (playerColor != lastPlayerTurnColor)
+		addCanvasListener(canvas, surface);
+	else 
+		applyNoTurn(canvas);
+}
+
+function isBlack() {
+	return playerColor == 'b';
+}
+function isWhite() {
+	return playerColor == 'w';
+}
 function init() {
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
 	drawBoard(surface, canvas);
 	drawGoPieces(surface);
 
-	var colorOpp = {'b':'white', 'w':'black'}
 	var currentPlayerTurn = document.getElementById('whose_turn');
-	var lastPlayerTurnColor;
 
-	if (moveHistory.length == 0) {
-		currentPlayerTurn.innerHTML = "Black Goes First";
-		if (playerColor == 'b') 
+	if (isBeginning()) {
+		setBlackFirst(currentPlayerTurn);
+
+		if (isBlack()) {
 			addCanvasListener(canvas, surface);
-		else {
-			addNotYourTurnListener(canvas);
-			removeSubmitButton();
-			ajaxCalling = window.setInterval(callAjaxNigga, 4000);
+		}
+		else if (isWhite()) {
+			applyNoTurn(canvas);
 		}
 	}
-	else {
-		lastPlayerTurnColor = moveHistory[moveHistory.length-1][1];
-		currentPlayerTurn.innerHTML = colorOpp[lastPlayerTurnColor].toUpperCase() + "'s turn";
-		if (playerColor != lastPlayerTurnColor)
-			addCanvasListener(canvas, surface);
-		else {
-			addNotYourTurnListener(canvas);
-			removeSubmitButton();
-			ajaxCalling = window.setInterval(callAjaxNigga, 4000);
-		}
+	else if (!isBeginning()) {
+		setTurn(canvas, surface);
 	}
 }
 function setFormSubmit() {
