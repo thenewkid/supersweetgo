@@ -7,6 +7,7 @@ var currentMoveData = [];
 var ajaxCalling;
 var board = [];
 var colorOpp = {'b':'white', 'w':'black'};
+
 //the 4 functions below the globals are for returning specific information
 //about the last move in moveHistory;
 function getLastMove() {
@@ -33,25 +34,6 @@ function getEmptyBoard() {
 		b.push(a);
 	}
 	return b;
-}
-
-//getCapturedStones takes in an opposite_stone of the current piece
-//we are looking at. The opposite_stone param will be 
-//an array with 3 elements, the color of the stone were checking, its x and y values
-function getCapturedStones(opposite_stone, x, y) {
-	var capture_color = opposite_stone[0]
-	var stones_to_be_captured = [];
-	var surrounding = getSurroundingStones(opposite_stone[1], opposite_stone[2])
-	if (sourrounding.length == 4) {
-		for (var i = 0; i < surrounding.length; i++) {
-			var s  = surrounding[i];
-			if (s[1] != x && s[2] != y && s[0] == capture_color) {
-				//
-			}
-		}
-		stones_to_be_captured.append(opposite_stone)
-	}
-	return stones_to_be_captured;	
 }
 
 //takes in an x and y spot on our 2D board and returns a 2D array
@@ -88,6 +70,14 @@ function areSurrStonesEmpty(stone_list) {
 	})
 	return bool;
 }
+function areSurrStonesFull(stone_list) {
+	var bool = true;
+	each(stone_list, function(stone) {
+		if (stone[0] == 'e')
+			bool = false;
+	}) 
+	return bool;
+}
 function getOpposite(stone_args, current_color) {
 	opposite_stones = []
 	each(stone_args, function(e) {
@@ -110,33 +100,33 @@ function updateBoard(howFarDown, howFarOver, col) {
 		if (opp_stones.length == 0)
 			return
 		else {
-			
+			each(opp_stones, function(e) {
+				var capturedStones = getCapturedStones(e, x, y);
+			});
 		}
-
-	// if (surr_stones.length == 0) 
-	//  	return;
-
-	// else if (surr_stones.length > 0) {
-	// 	oppositeStones = getOpposite(surr_stones, col)
-
-	// 	if (oppositeStones.length == 0 || oppositeStones == null) 
-	// 		return;
-
-	// 	else if (oppositeStones.length > 0) {
-	// 		//we have opposite stones in our adjacent stones
-	// 		//we loop through the opposite stones
-	// 		each(oppositeStones, function(e) {
-	// 			//[['c', 1, 2]]
-	// 			var capturedStones = getCapturedStones(e, x, y);
-
-	// 		})
-	// 	}
-	// }
-	// return board;
-	
-
-	//3. return board, number of white and black stones captured
 }
+
+
+function getCapturedStones(opposite_stone, x, y) {
+	var captureStone;
+	var stones_being_checked = []
+	var stones_to_be_captured = [];
+	var surrounding = getSurroundingStones(opposite_stone[1], opposite_stone[2])
+	while (areSurrStonesFull(surrounding)) {
+		stones_being_checked.push(opposite_stone); 
+		for (var i = 0; i < surrounding.length; i++) {
+			var s  = surrounding[i];
+			if (s[0] == opposite_stone[0]) {
+				stones_to_be_captured.push(opposite_stone);
+			}
+		}
+	}
+	return stones_to_be_captured;	
+}
+function argsEqual(arr1, arr2) {
+	return arr1.join('') == arr2.join('');
+}
+
 function makeBoard() {
 	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 	board = getEmptyBoard();
@@ -175,17 +165,6 @@ function drawGoPieces(surface) {
 		}
 	}
 }
-	// 	for (var m = 0; m < moveHistory.length; m++) {
-	// 		if (moveHistory[m][2] != 'pass') {
-	// 			var positionArray = getXYCoords(moveHistory[m][2], moveHistory[m][3])
-	// 			drawGoPiece(surface, positionArray[0], positionArray[1], moveHistory[m][1]);
-	// 		}
-	// 	}	
-	// }
-	//if movehistory > 0 we call makeBoard()
-	//that will set our global board to be set
-	//then we loop through our 2d board
-	//if the current element != 'e', then we call drawGoPiece(surface, )
 function getXY(x, y) {
 	var ex = (y+1)*35;
 	var y = (x+1)*35;
@@ -247,7 +226,7 @@ function drawGoPiece(surface, x, y, color) {
 }
 function drawBoard(surface, canvas) {
 	surface.strokeStyle = "black";
-	surface.lineWidth = 0.5;
+	surface.lineWidth = 1.5;
 	surface.fillStyle = "black";
 	var y = CELL_SPACING;
 	var x = CELL_SPACING;
