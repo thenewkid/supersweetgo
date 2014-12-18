@@ -87,46 +87,107 @@ function getOpposite(stone_args, current_color) {
 	return opposite_stones;
 }
 function updateBoard(howFarDown, howFarOver, col) {
+
+	console.log("Placing col on board at ".replace('col', col) + howFarDown.toString() + " " + howFarOver.toString());
 	board[howFarDown][howFarOver] = col;
-	var oppositeStones = null;
-
+	var captured_hoes = []
+	console.log("getting surrounding stones...");
 	var surr_stones = getSurroundingStones(howFarDown, howFarOver);
-	if (areSurrStonesEmpty(surr_stones))
+	if (areSurrStonesEmpty(surr_stones)) {
+		console.log("No Surrounding stones");
 		return
-	else
-		//we get opposite stones
-		//if opp stones are empty we return
+	}
+	else {
+		console.log("listing surrounding stones...");
+		each(surr_stones, function(e) {
+			console.log(e.toString());
+		})
+		console.log("getting opposite surrounding stones...");
 		var opp_stones = getOpposite(surr_stones, col);
-		if (opp_stones.length == 0)
+		if (opp_stones.length == 0) {
+			console.log("No Opposite Stones");
 			return
-		else {
-			each(opp_stones, function(e) {
-				var capturedStones = getCapturedStones(e, x, y);
-			});
 		}
-}
+		else {
+			console.log("Listing opposite surrounding stones");
+			each(opp_stones, function(e) {
+				console.log(e.toString());
+				console.log("calling getCapturedStones algorithm on " + e.toString());
+				each(getCapturedStones(e), function(e) {
+					captured_hoes.push(e)
+				});
 
-
-function getCapturedStones(opposite_stone, x, y) {
-	var captureStone;
-	var stones_being_checked = []
-	var stones_to_be_captured = [];
-	var surrounding = getSurroundingStones(opposite_stone[1], opposite_stone[2])
-	while (areSurrStonesFull(surrounding)) {
-		stones_being_checked.push(opposite_stone); 
-		for (var i = 0; i < surrounding.length; i++) {
-			var s  = surrounding[i];
-			if (s[0] == opposite_stone[0]) {
-				stones_to_be_captured.push(opposite_stone);
-			}
+			});
+			console.log("captured hoes is of length " + captured_hoes.length);
 		}
 	}
-	return stones_to_be_captured;	
+	each(captured_hoes, function(cs) {
+		removePieceFromBoard(cs);
+	});
 }
-function argsEqual(arr1, arr2) {
-	return arr1.join('') == arr2.join('');
+function removePieceFromBoard(stone) {
+	board[stone[1]][stone[2]] = 'e';
+}
+function addStoneToCaptured(stone) {
+	if (stone[0] == 'w')
+		capturedWhites.push(stone);
+	else if (stone[0] == 'b') 
+		capturedBlacks.push(stone);
+}
+function getSameColorStones(surrounding, color) {
+	var stones = [];
+	each(surrounding, function(s) {
+		if (s[0] == color)
+			stones.push(s);
+	});
+	return stones;
 }
 
+function getCapturedStones(stone) {
+		function findCapturedStones(stones_left_to_check, captured_stones, stones_already_checked) {
+			console.log('fcs stones_left_to_check is of length ' + stones_left_to_check.length)
+			console.log('fcs captured_stones is of length ' + captured_stones.length)
+
+			//0. base-case: if stones left to check is empty return list of captured stones
+			//1. pop the first stone in stones left to check list 
+			//   check if stone has empty liberties if so -> stop and return false;
+			//2. now we know the current stone is surrounded
+			//   add any same color surrounding stones to the stones left to check list ONLY if
+			//   it is not in stones_already_checked_list, 
+			//3. add next_stone to the list of stones to capture and to list of stones_already_checked 
+			//4. recur with updated lists
+
+			//step 0
+			if (stones_left_to_check.length == 0) return captured_stones;
+			//step 1
+			var next_stone = stones_left_to_check.pop();
+			var surrounding = getSurroundingStones(next_stone[1], next_stone[2]);
+			if (!areSurrStonesFull(surrounding)) return [];
+			//step 2
+			var same_color_stones = getSameColorStones(surrounding, next_stone[0]);
+
+			each(same_color_stones, function(stone) {
+				var stone_exists_flag = false;
+				each(stones_already_checked, function(s) {
+					if (argsEqual(s,stone)) stone_exists_flag = true;
+				});
+				if (!stone_exists_flag) {
+					stones_left_to_check.push(stone);	
+				}
+			});
+			//step 3
+			captured_stones.push(next_stone);
+			stones_already_checked.push(next_stone);
+			//step 4
+			return findCapturedStones(stones_left_to_check, captured_stones, stones_already_checked);
+
+	}
+	return findCapturedStones([stone], [], []);
+	
+	//we get the surrounding stones of the stone passed in
+	//if surrounding stones are full and opposite stones are full then we remove it from the board
+	//else 
+}
 function makeBoard() {
 	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 	board = getEmptyBoard();
@@ -140,6 +201,71 @@ function makeBoard() {
 		}
 	}
 }
+
+// function getCapturedStones(opposite_stone) {
+// 	// var stones_left = [opposite_stone];
+// 	// var stones_to_be_captured = [];
+// 	// var captureFlag;
+// 	while (true) {
+
+// 		//this code gets the surrounding stones for the current opposite stone
+// 		//of the piece being placed
+// 		var surrounding = getSurroundingStones(opposite_stone[1], opposite_stone[2]);
+// 		console.log("below are the surrounding stones for " + opposite_stone.toString());
+// 		console.log(surrounding);
+// 		break;
+		
+		//this code
+
+		// //if no empty liberties
+		// if (areSurrStonesFull(surrounding)) {
+		// 	//iterate through the surrounding stones
+		// 	each(surrounding, function(stone) {
+		// 		//if the color of our current surrounding stone == the color of the stone were checling the surrounding stones for
+		// 		if (stone[0] == stones_left[0][0]) {
+		// 			stones_to_be_captured.push(stones_left[0]);
+		// 			stones_left.splice(0, 1);
+		// 			stones_left.push(stone);
+		// 			captureFlag = false;
+		// 		}
+		// 	})
+		// }
+		// else {
+		// }
+
+
+
+
+	
+
+
+
+// 	var captureStone;
+// 	var stones_left = []
+// 	var stones_to_be_captured = [];
+// 	var surrounding = getSurroundingStones(opposite_stone[1], opposite_stone[2])
+// 	while (areSurrStonesFull(surrounding)) {
+// 		stones_being_checked.push(opposite_stone); 
+// 		for (var i = 0; i < surrounding.length; i++) {
+// 			var s  = surrounding[i];
+// 			if (s[0] == opposite_stone[0]) {
+// 				//we get to a stone that is same color as our opposite
+// 				//we take our opposite stone and remove it from stones_being checked
+// 				//and add it to our stones to be captured
+// 				//the current stone were at which is s
+// 				//we add that stone to stones being checked
+// 				stones_being_checked.push(s);
+// 			}
+// 		}
+// 		//here we set w
+// 	}
+// 	return stones_to_be_captured;	
+// }
+
+function argsEqual(arr1, arr2) {
+	return arr1.join('') == arr2.join('');
+}
+
 function each(array, funky) {
 	for (var i = 0; i < array.length; i++)
 		funky(array[i]);
@@ -151,13 +277,11 @@ function setCurrentColor(c) {
 		playerColor = 'b';
 }
 function drawGoPieces(surface) {
+	makeBoard();
 	if (moveHistory.length > 0) {
-		makeBoard();
 		for (var x = 0; x < board.length; x++) {
 			for (var y = 0; y < board[x].length; y++) {
 				if (board[x][y] != 'e') {
-					console.log("The position in our 2d board array and its color")
-					console.log([x, y, board[x][y]])
 					var coords = getXY(x, y);
 					drawGoPiece(surface, coords[0], coords[1], board[x][y])
 				}	
@@ -261,11 +385,20 @@ function drawBoard(surface, canvas) {
 function coordsToBoardDim(ix, iy) {
 	var boardX = (ix / 35)-1;
 	var boardY = (iy /35)-1;
-	return [boardY, boardX];
+	return [boardY,boardX];
 }
 function checkIfTaken(arr) {
-	var spot = board[arr[0]][arr[1]];
-	return spot != 'e';
+	return board[arr[0]][arr[1]] != 'e';
+}
+function drawFromBoard(surface) {
+	for (var x = 0; x < board.length; x++) {
+		for (var y = 0; y < board[x].length; y++) {
+			if (board[x][y] != 'e') {
+				var coords = getXY(x, y);
+				drawGoPiece(surface, coords[0], coords[1], board[x][y])
+			}	
+		}
+	}
 }
 function addCanvasListener(canvas, surface) {
 	canvas.addEventListener('click', function(e) {
@@ -295,7 +428,7 @@ function addCanvasListener(canvas, surface) {
 			else if (currentMoveData.length > 0) {
 				surface.clearRect(0, 0, canvas.width, canvas.height);
 				drawBoard(surface, canvas);
-				drawGoPieces(surface);
+				drawFromBoard(surface);
 				currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
 				drawGoPiece(surface, igx, igy, playerColor);
 				hasPieceBeenDrawn = true

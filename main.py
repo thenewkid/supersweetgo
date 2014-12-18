@@ -177,7 +177,7 @@ def delete_hoes():
 
 class HomePage(MainHandler):
     def get(self):
-        
+
         data = [[load_moves(g), load_game_info(g)] for g in Games.all()]
         self.render("home.html", data=data)
 
@@ -286,3 +286,6 @@ app = webapp2.WSGIApplication([
 #add function that checks to see iftwo passes are made in a row, if so get points and end game
 #add length for playgame url mapping
 #implement the capture stones algorithm
+#when player places a piece, make sure its not being placed on an intersection
+#that has opposite stones on all liberties, because in the game of go
+#thats not a valid move
