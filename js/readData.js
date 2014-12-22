@@ -2,6 +2,7 @@ var moveHistory = [];
 var hasPieceBeenDrawn = false;
 var CELL_SPACING = 35;
 var PIECE_WIDTH = 16;
+var OFFSET = 10;
 var playerColor;
 var currentMoveData = [];
 var ajaxCalling;
@@ -183,10 +184,6 @@ function getCapturedStones(stone) {
 
 	}
 	return findCapturedStones([stone], [], []);
-	
-	//we get the surrounding stones of the stone passed in
-	//if surrounding stones are full and opposite stones are full then we remove it from the board
-	//else 
 }
 function makeBoard() {
 	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
@@ -201,66 +198,6 @@ function makeBoard() {
 		}
 	}
 }
-
-// function getCapturedStones(opposite_stone) {
-// 	// var stones_left = [opposite_stone];
-// 	// var stones_to_be_captured = [];
-// 	// var captureFlag;
-// 	while (true) {
-
-// 		//this code gets the surrounding stones for the current opposite stone
-// 		//of the piece being placed
-// 		var surrounding = getSurroundingStones(opposite_stone[1], opposite_stone[2]);
-// 		console.log("below are the surrounding stones for " + opposite_stone.toString());
-// 		console.log(surrounding);
-// 		break;
-		
-		//this code
-
-		// //if no empty liberties
-		// if (areSurrStonesFull(surrounding)) {
-		// 	//iterate through the surrounding stones
-		// 	each(surrounding, function(stone) {
-		// 		//if the color of our current surrounding stone == the color of the stone were checling the surrounding stones for
-		// 		if (stone[0] == stones_left[0][0]) {
-		// 			stones_to_be_captured.push(stones_left[0]);
-		// 			stones_left.splice(0, 1);
-		// 			stones_left.push(stone);
-		// 			captureFlag = false;
-		// 		}
-		// 	})
-		// }
-		// else {
-		// }
-
-
-
-
-	
-
-
-
-// 	var captureStone;
-// 	var stones_left = []
-// 	var stones_to_be_captured = [];
-// 	var surrounding = getSurroundingStones(opposite_stone[1], opposite_stone[2])
-// 	while (areSurrStonesFull(surrounding)) {
-// 		stones_being_checked.push(opposite_stone); 
-// 		for (var i = 0; i < surrounding.length; i++) {
-// 			var s  = surrounding[i];
-// 			if (s[0] == opposite_stone[0]) {
-// 				//we get to a stone that is same color as our opposite
-// 				//we take our opposite stone and remove it from stones_being checked
-// 				//and add it to our stones to be captured
-// 				//the current stone were at which is s
-// 				//we add that stone to stones being checked
-// 				stones_being_checked.push(s);
-// 			}
-// 		}
-// 		//here we set w
-// 	}
-// 	return stones_to_be_captured;	
-// }
 
 function argsEqual(arr1, arr2) {
 	return arr1.join('') == arr2.join('');
@@ -343,7 +280,7 @@ function drawGoPiece(surface, x, y, color) {
 	}
 	surface.lineWidth = 1;
 	surface.beginPath();
-	surface.arc(x, y, PIECE_WIDTH, (Math.PI/180)*0, (Math.PI/180)*360, false);
+	surface.arc(x+OFFSET, y+OFFSET, PIECE_WIDTH, (Math.PI/180)*0, (Math.PI/180)*360, false);
 	surface.fill();
 	surface.stroke();
 	surface.closePath();
@@ -352,8 +289,8 @@ function drawBoard(surface, canvas) {
 	surface.strokeStyle = "black";
 	surface.lineWidth = 1.5;
 	surface.fillStyle = "black";
-	var y = CELL_SPACING;
-	var x = CELL_SPACING;
+	var y = CELL_SPACING+OFFSET;
+	var x = CELL_SPACING+OFFSET;
 
 	for (var j = 0; j < 19; j++) {
 		surface.beginPath();
@@ -366,8 +303,8 @@ function drawBoard(surface, canvas) {
 		surface.fillText((j+1).toString(), CELL_SPACING-30,y - 27 )
 	}
 
-	y = CELL_SPACING;
-	x = CELL_SPACING;
+	y = CELL_SPACING+OFFSET;
+	x = CELL_SPACING+OFFSET;
 
 	var x_letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H','I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S'];
 	for (var k = 0; k < 19; k++) {
@@ -400,8 +337,21 @@ function drawFromBoard(surface) {
 		}
 	}
 }
+function setCurrentMoveData(i, pc, mp0, mp1) {
+	currentMoveData = [i, pc, mp0, mp1];
+}
+function drawThePiece(surf, can, x, y, pc) {
+	surf.clearRect(0, 0, can.width, can.height);
+	drawBoard(surf, can);
+	drawFromBoard(surf);
+	drawGoPiece(surf, can, x, y, pc);
+}
+function setDrawnTrue() {
+	hasPieceBeenDrawn = true;
+}
 function addCanvasListener(canvas, surface) {
 	canvas.addEventListener('click', function(e) {
+		var alertInvalidMoveFlag = false;
 		var canvasRect = this.getBoundingClientRect();
 		var gx = e.x - canvasRect.left;
 		var gy = e.y - canvasRect.top;
@@ -418,20 +368,77 @@ function addCanvasListener(canvas, surface) {
 			var turnToIncrement = 0;
 			if (moveHistory.length > 0) 
 				turnToIncrement = getLastMoveTurn();
+			//get the piece thats being placed and get its xy coords
+			//for our 2d board array
+			//then we get the surrounding stones 
+			//if surrounding stones arent full we place the piece
+			//else if surrounding stones are full we get the opposite stones
+			//if opposite stones == 4 we call our algo on the opposite stones
+			//if the captured stones isnt empty then the move is valid
+			//else if oppositestones is between 0 and 4 we know have at least one color of the same stone
+			//then we call our algo on the same color stones and if those are captured we alert Invalid Move
+			//else if captured stones are empty we allow the piece to be played
+			var stone = [board[boardDimClicked[0]][boardDimClicked[1]], boardDimClicked[0], boardDimClicked[1]];
+			var surrounding = getSurroundingStones(stone[1], stone[2]);
+			if (!areSurrStonesFull(surrounding)) {
+				//code to draw a piece on the board;
 
-			if (currentMoveData.length == 0) {
-				currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
-			
-				drawGoPiece(surface, igx, igy, playerColor);
-				hasPieceBeenDrawn = true;
-			}
-			else if (currentMoveData.length > 0) {
 				surface.clearRect(0, 0, canvas.width, canvas.height);
 				drawBoard(surface, canvas);
 				drawFromBoard(surface);
 				currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
 				drawGoPiece(surface, igx, igy, playerColor);
-				hasPieceBeenDrawn = true
+				hasPieceBeenDrawn = true;
+			}
+			else {
+				var oppStones = getOpposite(surrounding, playerColor);
+				console.log("these are opposite stones for stone " + stone.toString())
+				if (oppStones.length == 0) {
+					surface.clearRect(0, 0, canvas.width, canvas.height);
+					drawBoard(surface, canvas);
+					drawFromBoard(surface);
+					currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
+					drawGoPiece(surface, igx, igy, playerColor);
+					hasPieceBeenDrawn = true;
+				}
+				else if (oppStones.length == 4) {
+					each(oppStones, function(stone) {
+						var capturedStones = getCapturedStones(stone);
+						if (capturedStones.length != 0) {
+							//code to draw a piece on the board;
+							surface.clearRect(0, 0, canvas.width, canvas.height);
+							drawBoard(surface, canvas);
+							drawFromBoard(surface);
+							currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
+							drawGoPiece(surface, igx, igy, playerColor);
+							hasPieceBeenDrawn = true;
+						}
+						else {
+							alertInvalidMoveFlag = true;
+						}
+					});
+				}
+				else if (oppStones.length > 0 && oppStones.length < 4) {
+					var sameColorSurrounding = getSameColorStones(surrounding, stone[0]);
+					each(sameColorSurrounding, function(stone) {
+						var capturedStones = getCapturedStones(stone);
+						if (capturedStones.length != 0) {
+							//code to draw a piece on the board;
+							surface.clearRect(0, 0, canvas.width, canvas.height);
+							drawBoard(surface, canvas);
+							drawFromBoard(surface);
+							currentMoveData = [turnToIncrement, playerColor, movePosition[0], movePosition[1]];
+							drawGoPiece(surface, igx, igy, playerColor);
+							hasPieceBeenDrawn = true;
+						}
+						else {
+							alertInvalidMoveFlag = true;
+						}
+					})	
+				}
+			}
+			if (alertInvalidMoveFlag) {
+				alert("Invalid Move Bitch");
 			}
 		}
 	}, false);
@@ -458,12 +465,6 @@ function checkSpotPosition(currentMoveArray) {
 	}
 	return false;
 
-}
-function setAjaxPosting() {
-	//we set the page to post every 10 seconds
-	//every 10 seconds we get the 
-	//get mouse coords every 20 seconds
-	//if mouse coords are the same then we stop
 }
 function setAjax(timer) {
 	ajaxCalling = window.setInterval(callAjaxNigga, timer);
@@ -520,7 +521,6 @@ function setTurn(turn_ele, canvas, surface) {
 	else 
 		applyNoTurn(canvas);
 }
-
 function isBlack() {
 	return playerColor == 'b';
 }
@@ -528,13 +528,12 @@ function isWhite() {
 	return playerColor == 'w';
 }
 function init() {
+	
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
 	drawBoard(surface, canvas);
 	drawGoPieces(surface);
-
 	var currentPlayerTurn = document.getElementById('whose_turn');
-
 	if (isBeginning()) {
 		setBlackFirst(currentPlayerTurn);
 
@@ -559,6 +558,13 @@ function setFormSubmit() {
 				return true;
 			}
 			else {
+				//get the last move in moveHistory
+				//if its a pass then we alert the user that 
+				//if they continue the game will be over
+				var lastMovePass = (getLastMove()[2] == 'pass');
+				if (lastMovePass)
+					var passSecondTimeGameOver = confirm("Are you sure you want to pass, 2 passes in row mean Game Over!!");
+					if (passSecondTimeGameOver)
 				var confirmPass = confirm("Are you sure you want to pass?");
 				if (confirmPass) {
 					form.move_to_add_db.value = 'pass';
@@ -576,5 +582,3 @@ window.onload = function() {
 	init();
 	setFormSubmit();
 }
-
-//once the user has clicked, do we want to have a button that says undo move so that they can pass after already placing a go PIECE_WIDTH

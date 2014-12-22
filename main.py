@@ -282,10 +282,13 @@ app = webapp2.WSGIApplication([
 ], debug=True)
 #current tasks bitches
 #update the canvas so the go pieces arent touching the coords
-#make the board resize based on page_width
 #add function that checks to see iftwo passes are made in a row, if so get points and end game
-#add length for playgame url mapping
-#implement the capture stones algorithm
-#when player places a piece, make sure its not being placed on an intersection
-#that has opposite stones on all liberties, because in the game of go
-#thats not a valid move
+#add a resign button if a player wants to give up
+#implement automatic scoring,
+#add a pass button
+#send a final email with game score
+#post version 1.0
+
+#implement chat box
+#in the game score email it has a go sgf file
+#special page for the finished game with a replay of the game and anyone can comment on the game
