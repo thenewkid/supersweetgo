@@ -23,7 +23,9 @@ function getLastMoveTurn() {
 function getLastMoveCoords() {
 	return [getLastMove()[2], getLastMove()[3]];
 }
-
+function isLastMovePass() {
+	return (getLastMove()[2] == 'pass');
+}
 //creates and returns a 19 X 19 2d list all filled with 'e'
 function getEmptyBoard() {
 	var b = [];
@@ -527,8 +529,28 @@ function isBlack() {
 function isWhite() {
 	return playerColor == 'w';
 }
+function updateSubmitButton(button_strang) {
+	var submit_button = document.getElementById('submit_hoes_to_the_pimp');
+	if (button_strang == 'pass') {
+		submit_button.innerHTML = "PASS";
+	}
+	else if (button_strang == "submit") {
+		submit_button.innerHTML = "SUBMIT MOVE";
+	}
+}
+//FOR A TRIPPY BUTTON WHEN ME AND MY BRO ARE BROGRAMMING WHILE TRIPPING BRO-BALLS
+// function bangblackbitches() {
+// 	var chill_nigga = window.setInterval(changeCol, 300);
+// }
+// function changeCol() {
+// 	colors = ['blue', 'green', 'black', 'white', 'purple', 'red'];
+// 	var rando_color = colors[Math.floor(Math.random() * colors.length)]
+// 	document.getElementById("submit_hoes_to_the_pimp").style.color = rando_color;
+// 	var rando_color = colors[Math.floor(Math.random() * colors.length)];
+// 	document.getElementById("submit_hoes_to_the_pimp").style.background = rando_color;
+
+// }
 function init() {
-	
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
 	drawBoard(surface, canvas);
@@ -549,32 +571,38 @@ function init() {
 	}
 }
 function setFormSubmit() {
-	var form = document.next_turn;
-	if (form) {
-		$(form).submit(function() {
+	var submit_move_form = document.next_turn;
+	//unnecessary if statement but whatever
+	if (submit_move_form) {
+		$(submit_move_form).submit(function() {
 			if (hasPieceBeenDrawn) {
 				currentMoveData[0]++;
-				form.move_to_add_db.value = currentMoveData.join(',');
+				submit_move_form.move_to_add_db.value = currentMoveData.join(',');
 				return true;
 			}
 			else {
-				//get the last move in moveHistory
-				//if its a pass then we alert the user that 
-				//if they continue the game will be over
-				var lastMovePass = (getLastMove()[2] == 'pass');
-				if (lastMovePass)
-					var passSecondTimeGameOver = confirm("Are you sure you want to pass, 2 passes in row mean Game Over!!");
-					if (passSecondTimeGameOver)
-				var confirmPass = confirm("Are you sure you want to pass?");
-				if (confirmPass) {
-					form.move_to_add_db.value = 'pass';
-					return true;
-				}
-				else
-					return false;
+				alert("You Must make a move before!!!")
+				return false;
 			}
 		});
 	}
+	var submit_pass_form = document.pass_form;
+	$(submit_pass_form).submit(function() {
+		if (isLastMovePass()) {
+			var game_over = confirm("Your opponent just passed. That means If you pass the game is over. Are you sure you want to pass and end the game?");
+			if (game_over) {
+				alert("Running game_over algorithm now");
+				
+			}
+			else
+				return false;
+		}
+		else {
+			var user_pass = confirm("Are you sure you want to pass");
+			if (user_pass) return true;
+		}
+	})
+
 }
 window.onload = function() {
 
@@ -582,3 +610,17 @@ window.onload = function() {
 	init();
 	setFormSubmit();
 }
+//get the last move in moveHistory
+				//if its a pass then we alert the user that 
+				//if they continue the game will be over
+				// var lastMovePass = (getLastMove()[2] == 'pass');
+				// if (lastMovePass)
+				// 	var passSecondTimeGameOver = confirm("Are you sure you want to pass, 2 passes in row mean Game Over!!");
+				// 	if (passSecondTimeGameOver)
+				// var confirmPass = confirm("Are you sure you want to pass?");
+				// if (confirmPass) {
+				// 	form.move_to_add_db.value = 'pass';
+				// 	return true;
+				// }
+				// else
+				// 	return false;

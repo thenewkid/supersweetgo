@@ -13,7 +13,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+#kkkllklk
+
 import webapp2
 import jinja2
 import os
@@ -45,6 +46,7 @@ class Games(db.Model):
     game_creation_time = db.DateTimeProperty(auto_now_add=True)
     moves = db.TextProperty(required=True)
     game_info = db.TextProperty(required=True)
+    game_status = db.StringProperty(required=True)
     @classmethod
     def init_entity(cls, p1n, p2n, 
                     p1eml, p2eml, p1_key, 
@@ -55,12 +57,15 @@ class Games(db.Model):
         init_game = pickle.dumps(d)
         game_to_put = Games(
             moves = init_moves,
-            game_info = init_game
+            game_info = init_game,
+            game_status = "ACTIVE"
         )
+
         game_to_put.put()
 
     @classmethod
     def player_keyz(cls):
+        #This function grabs all the player 1 and 2 keys from all the games
         games = Games.all()
         total_keys = []
         for g in games:
@@ -70,6 +75,7 @@ class Games(db.Model):
 
     @classmethod
     def by_link(cls, link):
+        #looks up a game by the link given to it
         for g in Games.all():
             p1_link = load_game_info(g)['p1_key']
             if link == p1_link:
@@ -81,6 +87,7 @@ class Games(db.Model):
 
     @classmethod 
     def game_keys(cls):
+        #looks up all the game keys from each game
         game_keys = []
         for g in Games.all():
             game_keys.append(load_game_info(g)['game_key'])
@@ -100,6 +107,7 @@ def create_game_key():
 
 def get_hash():
     return string.letters + string.digits
+    
 def get_keys():
     games = Games.all()
 
@@ -175,10 +183,11 @@ def init_and_dump_player(p1n, p2n, p1eml, p2eml):
 def delete_hoes():
     db.delete(Games.all())
 
+
 class HomePage(MainHandler):
     def get(self):
-
-        data = [[load_moves(g), load_game_info(g)] for g in Games.all()]
+        
+        data = [[load_moves(g), load_game_info(g),g.game_status] for g in Games.all()]
         self.render("home.html", data=data)
 
     def post(self):
@@ -222,6 +231,7 @@ def get_url_ind(l):
 def restart_game(g):
     g.moves = pickle.dumps([])
     g.put()
+    
 
 class PlayGame(MainHandler):
     def get(self):
@@ -241,32 +251,42 @@ class PlayGame(MainHandler):
     def post(self):
         form_submitted = self.request.get("subm")
         link = get_url_ind(self.request.url)
+        opposing_colors = {'b':'w', 'w':'b'}
         if form_submitted == 'submit_move':
-            opposing_colors = {'b':'w', 'w':'b'}
             new_moves = self.request.get("move_to_add_db")
             game = Games.by_link(link)
             player_data = get_current_player_info(game, link)
             moves = load_moves(game)
-
-            if new_moves != 'pass':
-                new_moves = new_moves.split(',')
-                moves.append(new_moves)
-            else:
-        #     #black will always start first
-                if len(moves) == 0:
-                    moves.append(['1', 'b', 'pass'])
-                else:
-                    last_move = moves[len(moves)-1]
-                    turnIncremented = int(last_move[0]) + 1
-                    color_of_passer = opposing_colors[last_move[1]]
-                    moves.append([str(turnIncremented), color_of_passer, 'pass'])
-    
+            new_moves = new_moves.split(',')
+            moves.append(new_moves)
             game.moves = pickle.dumps(moves)
             game.put()
             self.render(
-                "displayboard.html",
-                move_history = moves,
-                player_info = player_data,
+                    "displayboard.html",
+                    move_history = moves,
+                    player_info = player_data,
+            )
+
+        elif form_submitted == 'pass':
+            game = Games.by_link(link)
+            player_data = get_current_player_info(game, link)
+            moves = load_moves(game)
+            #black will always start first
+            if len(moves) == 0:
+                moves.append(['1', 'b', 'pass'])
+            else:
+                last_move = moves[len(moves)-1]
+                turnIncremented = int(last_move[0]) + 1
+                color_of_passer = opposing_colors[last_move[1]]
+                moves.append([str(turnIncremented), color_of_passer, 'pass'])
+
+            game.moves = pickle.dumps(moves)
+            game.put()
+
+            self.render(
+                    "displayboard.html",
+                    move_history = moves,
+                    player_info = player_data,
             )
 
         elif form_submitted == 'submit_ajax':
@@ -280,10 +300,6 @@ app = webapp2.WSGIApplication([
     ('/', HomePage),
     (r'/[a-zA-Z0-9]+', PlayGame)
 ], debug=True)
-#current tasks bitches
-#update the canvas so the go pieces arent touching the coords
-#add function that checks to see iftwo passes are made in a row, if so get points and end game
-#add a resign button if a player wants to give up
 #implement automatic scoring,
 #add a pass button
 #send a final email with game score
