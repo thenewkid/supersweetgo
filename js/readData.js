@@ -571,6 +571,7 @@ function init() {
 	}
 }
 function calculate_territory() {
+	alert("I hope this runs");
 	console.log("Starting calculate territory function");
 	var inters_already = [];
 
@@ -580,11 +581,15 @@ function calculate_territory() {
 		//border_stones, if it is we return
 		if (inters_to_check.length == 0) return inters_already;
 		var next_inter = inters_to_check.pop();
+		console.log("next intersection to check is " + next_inter.toString())
 		// get all the neighboring locations
+		console.log("listing neighbors...")
 		var neighbors = getSurroundingStones(next_inter[1], next_inter[2])	// if any are stones, add them to the border list, unless they conflict, in which case just fail
-		
+		console.log(neighbors);
+		console.log("looping through neighbors now");
 		for(var i=0; i < neighbors.length;i++) {
 			if (neighbors[i][0] == 'e') {
+				console.log("")
 				var flag = false;
 				each(inters_already, function(e) {
 					if (argsEqual(neighbors[i], e)) {
@@ -592,11 +597,13 @@ function calculate_territory() {
 					}
 				})
 				if (!flag) {
+					console.log("adding neighbor" + neighbors[i].toString() + " to inters_to_check");
 					inters_to_check.push(neighbors[i]);
 				}
 			}
 			else if (border_stones.length == 0) {
 				//we know this is our ifrst stone
+				console.log("adding " + neighbors[i].toString() + "to border stones")
 				border_stones.push(neighbors[i]);
 			}
 			else {
@@ -611,16 +618,18 @@ function calculate_territory() {
 	for (var down = 0; down < 19; down++) {
 		for (var over = 0; over < 19; over++) {
 			if (board[down][over] == 'e') {
+				var current_inter = [board[down][over], down, over];
 				console.log("robot has reached empty intersection at " + down + ',' + over )
 				console.log("calling find_inters algorithm on " + down + "," + over);
 				if (inters_already.length > 0) {
 					var flag = false;
 					each(inters_already, function(e) {
-						if (argsEqual(e, [board[down][over], down, over]))
+						if (argsEqual(e, current_inter))
 							flag = true;
 					})
+					//if current intersection has not already been checked
 					if (!flag) {
-						var inters = find_inters([], [], inters_already);
+						var inters = find_inters([], [current_inter], inters_already);
 						if (inters.length > 0) {
 							each(inters, function(i) {
 								inters_already.push(i);
@@ -631,7 +640,7 @@ function calculate_territory() {
 					}
 				}
 				else if (inters_already.length == 0) {
-					var inters = find_inters([], [], inters_already);
+					var inters = find_inters([], [current_inter], inters_already);
 					if (inters.length > 0) {
 						each(inters, function(i) {
 							inters_already.push(i);
@@ -667,7 +676,7 @@ function setFormSubmit() {
 			if (game_over) {
 				alert("Running game_over algorithm now");
 				//for each intersection we call calculate_territory its surrounding stones
-				calculate_territory();
+				//calculate_territory();
 				alert("Finished calculating score Dylan");
 				//after we calculate score and send emails we freeze the board how it is and remove buttons and forms
 				return false;
@@ -683,10 +692,10 @@ function setFormSubmit() {
 
 }
 window.onload = function() {
-
 	console.log(moveHistory);
 	init();
 	setFormSubmit();
+	
 }
 //get the last move in moveHistory
 				//if its a pass then we alert the user that 
