@@ -574,30 +574,32 @@ function calculate_territory() {
 	alert("I hope this runs");
 	console.log("Starting calculate territory function");
 	var inters_already = [];
-
-	function find_inters(border_stones, inters_to_check, inters_already) {
+	function find_inters(border_stones, inters_to_check, inters_already_inner) {
+		
 		//get surrounding stones, if one is white and one is black we return
 		//if their all the same color then we check to see if the opp color is in 
 		//border_stones, if it is we return
-		if (inters_to_check.length == 0) return inters_already;
+		if (inters_to_check.length == 0) return [inters_already_inner, border_stones[0][0]];
 		var next_inter = inters_to_check.pop();
-		console.log("next intersection to check is " + next_inter.toString())
+		// console.log("next intersection to check is " + next_inter.toString())
 		// get all the neighboring locations
-		console.log("listing neighbors...")
+		// console.log("listing neighbors...")
 		var neighbors = getSurroundingStones(next_inter[1], next_inter[2])	// if any are stones, add them to the border list, unless they conflict, in which case just fail
-		console.log(neighbors);
-		console.log("looping through neighbors now");
+		// console.log(neighbors);
+		// console.log("looping through neighbors now");
 		for(var i=0; i < neighbors.length;i++) {
 			if (neighbors[i][0] == 'e') {
-				console.log("")
-				var flag = false;
-				each(inters_already, function(e) {
+				var inter_exists = false;
+				each(inters_already_inner, function(e) {
 					if (argsEqual(neighbors[i], e)) {
-						flag = true;
+						inter_exists = true;
 					}
-				})
-				if (!flag) {
-					console.log("adding neighbor" + neighbors[i].toString() + " to inters_to_check");
+				});
+				// if (!flag) {
+				// 	console.log(neighbors[i].toString() + "is not in inters_already_inner,);
+
+				// }
+				if (!inter_exists) {
 					inters_to_check.push(neighbors[i]);
 				}
 			}
@@ -606,13 +608,14 @@ function calculate_territory() {
 				console.log("adding " + neighbors[i].toString() + "to border stones")
 				border_stones.push(neighbors[i]);
 			}
-			else {
+			else { // border stones has at least one stone in it
 				if (neighbors[i][0] != border_stones[0][0]) {
-					return [];
+					return []; //fail ans exit recursive function
 				}
 			}
 		}
-		find_inters(border_stones, inters_to_check, inters_already);
+		inters_already_inner.push(next_inter);
+		return find_inters(border_stones, inters_to_check, inters_already_inner);
 	}
 	console.log("looping through each intersection");
 	for (var down = 0; down < 19; down++) {
@@ -621,34 +624,18 @@ function calculate_territory() {
 				var current_inter = [board[down][over], down, over];
 				console.log("robot has reached empty intersection at " + down + ',' + over )
 				console.log("calling find_inters algorithm on " + down + "," + over);
-				if (inters_already.length > 0) {
-					var flag = false;
-					each(inters_already, function(e) {
-						if (argsEqual(e, current_inter))
-							flag = true;
-					})
-					//if current intersection has not already been checked
-					if (!flag) {
-						var inters = find_inters([], [current_inter], inters_already);
-						if (inters.length > 0) {
-							each(inters, function(i) {
-								inters_already.push(i);
-							})
-							console.log("printing calculated intersections now");
-							console.log(inters);
-						}
-					}
-				}
-				else if (inters_already.length == 0) {
-					var inters = find_inters([], [current_inter], inters_already);
-					if (inters.length > 0) {
-						each(inters, function(i) {
-							inters_already.push(i);
-						})
-						console.log("Printing calculated intersections");
-						console.log(inters);
-					}
-				}
+				var results = find_inters([], [current_inter], []);
+				if (results.length > 0)
+					console.log(results);
+				//we are currently recieiving an error right here
+				// if (results.length > 0) {
+				// 	//we know we a player has some territory
+				// 	//we need to figure out the player whose territory it it
+				// 	var player = results[1];
+				// 	console.log(results[0] + ' ' + player);
+				// 	alert("Pausing looper");
+
+				// }
 			}
 		}
 	}
