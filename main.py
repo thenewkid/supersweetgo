@@ -180,7 +180,7 @@ def init_and_dump_player(p1n, p2n, p1eml, p2eml):
     send_mailkeys(p1_key, p1n, p2_key, p2n, p1eml, p2eml)
     Games.init_entity(p1n, p2n, p1eml, p2eml, p1_key, p2_key, game_key)
 
-def delete_hoes():
+def delete_games():
     db.delete(Games.all())
 
 
