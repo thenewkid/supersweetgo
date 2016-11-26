@@ -93,7 +93,7 @@ function updateBoard(howFarDown, howFarOver, col) {
 
 	console.log("Placing col on board at ".replace('col', col) + howFarDown.toString() + " " + howFarOver.toString());
 	board[howFarDown][howFarOver] = col;
-	var captured_hoes = []
+	var captured_stones = []
 	console.log("getting surrounding stones...");
 	var surr_stones = getSurroundingStones(howFarDown, howFarOver);
 	if (areSurrStonesEmpty(surr_stones)) {
@@ -117,11 +117,11 @@ function updateBoard(howFarDown, howFarOver, col) {
 				console.log(e.toString());
 				console.log("calling getCapturedStones algorithm on " + e.toString());
 				each(getCapturedStones(e), function(e) {
-					captured_hoes.push(e)
+					captured_stones.push(e)
 				});
 
 			});
-			console.log("captured hoes is of length " + captured_hoes.length);
+			console.log("captured is of length " + captured_stones.length);
 		}
 	}
 	each(captured_hoes, function(cs) {
@@ -159,14 +159,12 @@ function getCapturedStones(stone) {
 			//   it is not in stones_already_checked_list, 
 			//3. add next_stone to the list of stones to capture and to list of stones_already_checked 
 			//4. recur with updated lists
-
-			//step 0
 			if (stones_left_to_check.length == 0) return captured_stones;
-			//step 1
+		
 			var next_stone = stones_left_to_check.pop();
 			var surrounding = getSurroundingStones(next_stone[1], next_stone[2]);
 			if (!areSurrStonesFull(surrounding)) return [];
-			//step 2
+			
 			var same_color_stones = getSameColorStones(surrounding, next_stone[0]);
 
 			each(same_color_stones, function(stone) {
@@ -178,10 +176,10 @@ function getCapturedStones(stone) {
 					stones_left_to_check.push(stone);	
 				}
 			});
-			//step 3
+		
 			captured_stones.push(next_stone);
 			stones_already_checked.push(next_stone);
-			//step 4
+
 			return findCapturedStones(stones_left_to_check, captured_stones, stones_already_checked);
 
 	}
@@ -362,14 +360,14 @@ function addCanvasListener(canvas, surface) {
 		var boardDimClicked = coordsToBoardDim(igx, igy);
 		var isSpotTaken = checkIfTaken(boardDimClicked);
 		var movePosition = getLetterNumberCoords(igx, igy);
-		//var isSpotTaken = checkSpotPosition(movePosition);
-		//alert(igx + ' ' + igy);
+		
 		if (isSpotTaken) 
 			alert("Please select a different spot");
 		else {
 			var turnToIncrement = 0;
 			if (moveHistory.length > 0) 
 				turnToIncrement = getLastMoveTurn();
+			
 			//get the piece thats being placed and get its xy coords
 			//for our 2d board array
 			//then we get the surrounding stones 
@@ -383,8 +381,8 @@ function addCanvasListener(canvas, surface) {
 			var stone = [board[boardDimClicked[0]][boardDimClicked[1]], boardDimClicked[0], boardDimClicked[1]];
 			var surrounding = getSurroundingStones(stone[1], stone[2]);
 			if (!areSurrStonesFull(surrounding)) {
+				
 				//code to draw a piece on the board;
-
 				surface.clearRect(0, 0, canvas.width, canvas.height);
 				drawBoard(surface, canvas);
 				drawFromBoard(surface);
@@ -425,6 +423,7 @@ function addCanvasListener(canvas, surface) {
 					each(sameColorSurrounding, function(stone) {
 						var capturedStones = getCapturedStones(stone);
 						if (capturedStones.length != 0) {
+							
 							//code to draw a piece on the board;
 							surface.clearRect(0, 0, canvas.width, canvas.height);
 							drawBoard(surface, canvas);
@@ -440,7 +439,7 @@ function addCanvasListener(canvas, surface) {
 				}
 			}
 			if (alertInvalidMoveFlag) {
-				alert("Invalid Move Bitch");
+				alert("Invalid Move");
 			}
 		}
 	}, false);
@@ -451,6 +450,7 @@ function addNotYourTurnListener(canvas) {
 	}, false);
 }
 function retrieveAllTakenIntersections() {
+	
 	//this function loops through move history and stores each x, y coords in an array
 	var currentTakenSpots = [];
 	each(moveHistory, function(move) {
@@ -469,27 +469,25 @@ function checkSpotPosition(currentMoveArray) {
 
 }
 function setAjax(timer) {
-	ajaxCalling = window.setInterval(callAjaxNigga, timer);
+	ajaxCalling = window.setInterval(callAjax, timer);
 }
 function clearAjax() {
 	clearInterval(ajaxCalling);
 }
 function reloadPage() {
-	var chill = window.location;
-	window.location = chill.protocol + '//' + chill.host + chill.pathname;
+	var wloc = window.location;
+	window.location = wloc.protocol + '//' + wloc.host + wloc.pathname;
 }
 function refresh() {
 	clearAjax();
 	reloadPage();
 }
-function callAjaxNigga() {
+function callAjax() {
 	$.ajax({
-
 		type: 'POST',
 		data: {'subm': 'submit_ajax'},
 		dataType: 'json',
 		success: function(movesLengthFromServer) {
-			
 			if (movesLengthFromServer > moveHistory.length) {
 				refresh();
 			}
@@ -538,18 +536,7 @@ function updateSubmitButton(button_strang) {
 		submit_button.innerHTML = "SUBMIT MOVE";
 	}
 }
-//FOR A TRIPPY BUTTON WHEN ME AND MY BRO ARE BROGRAMMING WHILE TRIPPING BRO-BALLS
-// function bangblackbitches() {
-// 	var chill_nigga = window.setInterval(changeCol, 300);
-// }
-// function changeCol() {
-// 	colors = ['blue', 'green', 'black', 'white', 'purple', 'red'];
-// 	var rando_color = colors[Math.floor(Math.random() * colors.length)]
-// 	document.getElementById("submit_hoes_to_the_pimp").style.color = rando_color;
-// 	var rando_color = colors[Math.floor(Math.random() * colors.length)];
-// 	document.getElementById("submit_hoes_to_the_pimp").style.background = rando_color;
 
-// }
 function init() {
 	var canvas = document.querySelector("canvas");
 	var surface = canvas.getContext("2d");
@@ -581,10 +568,12 @@ function calculate_territory() {
 		//border_stones, if it is we return
 		if (inters_to_check.length == 0) return [inters_already_inner, border_stones[0][0]];
 		var next_inter = inters_to_check.pop();
+		
 		// console.log("next intersection to check is " + next_inter.toString())
 		// get all the neighboring locations
 		// console.log("listing neighbors...")
 		var neighbors = getSurroundingStones(next_inter[1], next_inter[2])	// if any are stones, add them to the border list, unless they conflict, in which case just fail
+		
 		// console.log(neighbors);
 		// console.log("looping through neighbors now");
 		for(var i=0; i < neighbors.length;i++) {
@@ -627,22 +616,13 @@ function calculate_territory() {
 				var results = find_inters([], [current_inter], []);
 				if (results.length > 0)
 					console.log(results);
-				//we are currently recieiving an error right here
-				// if (results.length > 0) {
-				// 	//we know we a player has some territory
-				// 	//we need to figure out the player whose territory it it
-				// 	var player = results[1];
-				// 	console.log(results[0] + ' ' + player);
-				// 	alert("Pausing looper");
-
-				// }
 			}
 		}
 	}
 }
 function setFormSubmit() {
 	var submit_move_form = document.next_turn;
-	//unnecessary if statement but whatever
+	
 	if (submit_move_form) {
 		$(submit_move_form).submit(function() {
 			if (hasPieceBeenDrawn) {
